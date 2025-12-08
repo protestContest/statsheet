@@ -1,0 +1,9 @@
+build/
+dist/
+*.sublime-workspace
+.DS_Store
+tools/romfix/romfix
+tools/rmake/rmake
+tools/rmake/res-extract
+*.rsrc
+*.dSYM
