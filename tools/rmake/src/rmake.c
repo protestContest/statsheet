@@ -6,20 +6,34 @@
 #include "manifest.h"
 #include "huffman.h"
 #include "lzss.h"
+#include "runlength.h"
+#include "pack_stats.h"
 
 /*
 Reads a manifest file and packs resources into a resource file. The manifest file is a list of
 resource specs, one per line. Each resource spec specifies the relative path of the resource
-followed by a list of optional flag characters:
+followed by an optional packing method:
 
-  L: Compress with LZSS
+  Z: Compress with LZSS
   h: Compress with Huffman, 4-bit
   H: Compress with Huffman, 8-bit
   R: Compress with run-length
-  f: Filter 8-bit chunks before compressing
-  F: Filter 16-bit chunks before compressing
 
 */
+
+typedef void (*PackFn)(ResInfo *info, FILE *f);
+
+typedef struct {
+  char *name;
+  PackFn pack;
+} PackMethod;
+
+static PackMethod methods[] = {
+  {"Z", PackLZSS},
+  {"H", PackHuffman},
+  {"R", PackRunLength},
+  {"PackStats", PackStats}
+};
 
 void Filter(u8 *data, u32 size, u32 dataSize)
 {
@@ -43,76 +57,6 @@ void Filter(u8 *data, u32 size, u32 dataSize)
   }
 }
 
-void RunLengthEncode(u8 *data, ResInfo *info)
-{
-  u32 header = (info->size << 8) | (RunLength << 4);
-  u32 size = sizeof(header);
-
-  u32 start, end = 0;
-  while (end < info->size) {
-    start = end;
-    while (
-        end < info->size &&
-        (end + 3 > info->size || data[end] != data[end+1] || data[end] != data[end+2]) &&
-        end - start < 128) {
-      end++;
-    }
-    if (end - start > 0) {
-      size += end - start + 1;
-    }
-
-    start = end;
-    while (end < info->size && data[end] == data[start] && end - start < 130) {
-      end++;
-    }
-    if (end - start > 2) {
-      size += 2;
-      start = end;
-    } else {
-      end = start;
-    }
-  }
-
-  u8 *encoded = malloc(Align(size, 4));
-  *((u32*)encoded) = header;
-  u8 *cur = encoded + sizeof(header);
-
-  end = 0;
-  while (end < info->size) {
-    start = end;
-    while (
-        end < info->size &&
-        (end > info->size - 3 || data[end] != data[end+1] || data[end] != data[end+2]) &&
-        end - start < 128) {
-      end++;
-    }
-    if (end - start > 0) {
-      *cur++ = end - start - 1;
-      for (u32 i = start; i < end; i++) {
-        *cur++ = data[i];
-      }
-    }
-
-    start = end;
-    while (end < info->size && data[end] == data[start] && end - start < 130) {
-      end++;
-    }
-    if (end - start > 2) {
-      *cur++ = (end - start - 3) | 0x80;
-      *cur++ = data[start];
-    } else {
-      end = start;
-    }
-  }
-
-  for (u32 i = size; i < Align(size, 4); i++) {
-    encoded[i] = 0;
-  }
-
-  info->data = encoded;
-  info->size = size;
-}
-
 void EncodeItem(ResInfo *info)
 {
   FILE *f = fopen(info->path, "r+b");
@@ -125,44 +69,20 @@ void EncodeItem(ResInfo *info)
   info->size = ftell(f);
   fseek(f, 0, SEEK_SET);
 
-  u8 *data;
-
-  switch (info->compressionType) {
-  case LZSS:
-    data = malloc(info->size);
-    fread(data, info->size, 1, f);
-    fclose(f);
-    LZSSEncode(data, info);
-    free(data);
-    return;
-  case Huffman:
-    data = malloc(info->size);
-    fread(data, info->size, 1, f);
-    fclose(f);
-    HuffmanEncode(data, info);
-    free(data);
-    return;
-  case RunLength:
-    data = malloc(info->size);
-    fread(data, info->size, 1, f);
-    fclose(f);
-    RunLengthEncode(data, info);
-    free(data);
-    return;
-  case SubFilter:
-    data = malloc(info->size);
-    fread(data, info->size, 1, f);
-    Filter(data, info->size, info->compressionArg);
-    info->data = data;
-    return;
-  default:
-    data = malloc(info->size + sizeof(u32));
-    *((u32*)data) = info->size << 8;
-    fread(data + sizeof(u32), info->size, 1, f);
-    fclose(f);
-    info->data = data;
-    return;
+  if (info->packMethod) {
+    for (u32 i = 0; i < ArrayCount(methods); i++) {
+      if (strcmp(methods[i].name, info->packMethod) == 0) {
+        methods[i].pack(info, f);
+        break;
+      }
+    }
   }
+  if (!info->data) {
+    info->data = malloc(info->size + sizeof(u32));
+    *((u32*)info->data) = info->size << 8;
+    fread(info->data + sizeof(u32), info->size, 1, f);
+  }
+  fclose(f);
 }
 
 ResFile *NewResFile(Manifest *manifest)

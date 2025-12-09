@@ -12,3 +12,4 @@
 #include "kit/str.h"
 #include "kit/text.h"
 #include "kit/time.h"
+#include "kit/vec.h"

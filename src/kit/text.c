@@ -129,7 +129,6 @@ void GetFontInfo(FontInfo *info)
   info->descent = currentFont->descent;
   info->widMax = currentFont->wid_max;
   info->leading = currentFont->leading;
-  info->lineHeight = info->ascent + info->descent;
 }
 
 void Print(char *str)
@@ -155,5 +154,5 @@ u32 TextHeight(char *str)
     if (*str == '\n') lines++;
     str++;
   }
-  return lines*info.lineHeight;
+  return lines*(info.ascent+info.descent);
 }

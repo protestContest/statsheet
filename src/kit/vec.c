@@ -1,0 +1,33 @@
+#include "kit/vec.h"
+#include "kit/mem.h"
+#include "kit/debug.h"
+
+void ResizeVec(Vec *vec, u32 capacity)
+{
+  vec->capacity = capacity;
+  vec->items = Realloc(vec->items, vec->itemSize*vec->capacity);
+}
+
+void VecPush(Vec *vec, void *item)
+{
+  if (vec->count + 1 > vec->capacity) {
+    vec->capacity = vec->capacity ? 2*vec->capacity : 2;
+    vec->items = Realloc(vec->items, vec->itemSize*vec->capacity);
+    Assert(vec->items);
+  }
+
+  u32 index = vec->count++;
+  Copy(item, VecAt(vec, index), vec->itemSize);
+}
+
+void VecGet(Vec *vec, u32 index, void *dst)
+{
+  if (index >= vec->count) return;
+  Copy(VecAt(vec, index), dst, vec->itemSize);
+}
+
+void *VecAt(Vec *vec, u32 index)
+{
+  if (index >= vec->count) return 0;
+  return ((u8*)vec->items) + index*vec->itemSize;
+}

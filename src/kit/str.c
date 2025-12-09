@@ -65,7 +65,7 @@ char *HexToString(i32 num, char *str)
   u32 numDigits = NumDigits(num, 16);
   for (u32 i = 0; i < numDigits; i++) {
     u32 digit = num % 16;
-    str[numDigits-i-1] = (digit < 10) ? digit + '0' : digit + 'A';
+    str[numDigits-i-1] = (digit < 10) ? digit + '0' : digit - 10 + 'A';
     num /= 16;
   }
   return str + numDigits;

@@ -1,4 +1,5 @@
 #include "huffman.h"
+#include "../../inc/kit/res.h"
 
 typedef struct HuffNode {
   u8 data;
@@ -173,7 +174,7 @@ void HuffmanEncode(u8 *data, ResInfo *info)
   info->data = encoded;
 
   // header
-  *((u32*)encoded) = (info->size << 8) | (info->compressionType << 4) | (info->compressionArg);
+  *((u32*)encoded) = (info->size << 8) | (Huffman << 4) | (8);
   encoded += sizeof(u32);
 
   // tree size byte
@@ -183,4 +184,12 @@ void HuffmanEncode(u8 *data, ResInfo *info)
   WriteHuffData(data, info->size, dict, (u32*)encoded);
 
   info->size = encSize;
+}
+
+void PackHuffman(ResInfo *info, FILE *f)
+{
+  u8 *data = malloc(info->size);
+  fread(data, info->size, 1, f);
+  HuffmanEncode(data, info);
+  free(data);
 }

@@ -3,11 +3,10 @@
 typedef struct {
   char *name;
   u32 id;
-  u32 compressionType;
-  u32 compressionArg;
-  char *path;
   u32 size;
   u8 *data;
+  char *packMethod;
+  char *path;
 } ResInfo;
 
 typedef struct {

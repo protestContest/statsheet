@@ -1,20 +1,8 @@
 #include "manifest.h"
 #include "../../inc/kit/res.h"
+#include "parse.h"
 #include <string.h>
 #include <libgen.h>
-
-#define IsWhitespace(c) ((c) == ' ' || (c) == '\t' || (c) == '\n')
-
-static u32 Hash(void *data, u32 size)
-{
-  u32 hash = 5381;
-  u32 i;
-  u8 *bytes = (u8*)data;
-  for (i = 0; i < size; i++) {
-    hash = ((hash << 5) + hash) + bytes[i];
-  }
-  return hash;
-}
 
 static void ManifestAppend(Manifest *manifest, ResInfo info)
 {
@@ -27,23 +15,6 @@ static void ManifestAppend(Manifest *manifest, ResInfo info)
   }
 
   manifest->items[manifest->count++] = info;
-}
-
-static char *SkipWhitespace(char *cur, char *end)
-{
-  while (cur < end && IsWhitespace(*cur)) cur++;
-  return cur;
-}
-
-static char *ParseName(char **cur, char *end)
-{
-  char *start = *cur;
-  while (*cur < end && !IsWhitespace(**cur)) (*cur)++;
-  u32 len = *cur - start;
-  char *name = malloc(len + 1);
-  strncpy(name, start, len);
-  name[len] = 0;
-  return name;
 }
 
 static char *PathJoin(char *dir, char *base)
@@ -121,33 +92,7 @@ Manifest *ParseManifest(char *path)
     while (cur < fileEnd && IsWhitespace(*cur) && *cur != '\n') cur++;
 
     if (cur < fileEnd && *cur != '\n') {
-      while (cur < fileEnd && !IsWhitespace(*cur)) {
-        switch (*cur) {
-        case 'L':
-          info.compressionType = LZSS;
-          break;
-        case 'h':
-          info.compressionType = Huffman;
-          info.compressionArg = 4;
-          break;
-        case 'H':
-          info.compressionType = Huffman;
-          info.compressionArg = 8;
-          break;
-        case 'R':
-          info.compressionType = RunLength;
-          break;
-        case 'f':
-          info.compressionType = SubFilter;
-          info.compressionArg = 1;
-          break;
-        case 'F':
-          info.compressionType = SubFilter;
-          info.compressionArg = 2;
-          break;
-        }
-        cur++;
-      }
+      info.packMethod = ParseName(&cur, fileEnd);
     }
 
     info.path = PathJoin(manifest->path, info.name);

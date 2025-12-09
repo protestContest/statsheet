@@ -1,5 +1,7 @@
 #include "ui.h"
 
+#define cursorObj 0
+
 void InitUI(void)
 {
   SpriteFrame arrowFrame = {512, 0, 0};
@@ -11,6 +13,12 @@ void InitUI(void)
   InitSprite(&arrowRight, Obj8x8, 0, 1, &arrowFrame);
   SetObjDisplay(arrowRightObj, HideObj);
   AssignSprite(arrowRightObj, &arrowRight);
+
+  SpriteFrame cursorFrame = {512, 0, 0};
+  AnimatedSprite cursor;
+  InitSprite(&cursor, Obj8x8, 0, 1, &cursorFrame);
+  SetObjDisplay(cursorObj, HideObj);
+  AssignSprite(cursorObj, &cursor);
 }
 
 void ShowWindow(Rect *bounds)
@@ -138,4 +146,81 @@ void Alert(char *text)
   i16 width = TextWidth(text) + 16;
   i16 height = TextHeight(text) + 16;
   TextWindow(text, SCREEN_W/2 - width/2, SCREEN_H/2 - height/2);
+}
+
+void ShowCursor(void)
+{
+  SetObjDisplay(cursorObj, ShowObj);
+}
+
+void HideCursor(void)
+{
+  SetObjDisplay(cursorObj, HideObj);
+}
+
+void PlaceCursor(i16 x, i16 y)
+{
+  PlaceObj(cursorObj, x-8, y-4);
+}
+
+static void DrawNum(i32 num, i16 x, i16 y, bool showSign)
+{
+  char str[8] = {0};
+  if (showSign && num >= 0) {
+    str[0] = '+';
+    NumToString(num, str+1);
+  } else {
+    NumToString(num, str);
+  }
+  MoveTo(x - TextWidth(str), y);
+  Print(str);
+}
+
+i32 EditNum(i32 num, Rect *bounds, bool showSign)
+{
+  i32 original = num;
+  FontInfo info;
+  GetFontInfo(&info);
+  SetColor(BLACK);
+  InsetRect(bounds, -2, -2);
+  FrameRect(bounds);
+  InsetRect(bounds, 1, 1);
+
+  i16 x = bounds->right-1;
+  i16 y = bounds->top+1+info.ascent;
+
+  FillRect(bounds, WHITE);
+  DrawNum(num, x, y, showSign);
+
+  PlaceObj(arrowLeftObj, bounds->left - 7, bounds->top + 3);
+  SetObjDisplay(arrowLeftObj, ShowObj);
+  PlaceObj(arrowRightObj, bounds->right - 1, bounds->top + 3);
+  SetObjDisplay(arrowRightObj, ShowObj);
+
+  while (true) {
+    VSync();
+    u16 input = GetInput();
+    if (KeyPressed(BTN_A)) {
+      break;
+    } else if (KeyPressed(BTN_B) || KeyPressed(BTN_SELECT)) {
+      num = original;
+      break;
+    } else if (KeyPressed(BTN_LEFT)) {
+      num--;
+    } else if (KeyPressed(BTN_RIGHT)) {
+      num++;
+    }
+    if (input & (BTN_LEFT | BTN_RIGHT)) {
+      FillRect(bounds, WHITE);
+      DrawNum(num, x, y, showSign);
+    }
+  }
+
+  SetObjDisplay(arrowLeftObj, HideObj);
+  SetObjDisplay(arrowRightObj, HideObj);
+
+  InsetRect(bounds, -1, -1);
+  FillRect(bounds, WHITE);
+  DrawNum(num, x, y, showSign);
+  return num;
 }

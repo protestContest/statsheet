@@ -5,7 +5,6 @@ typedef struct {
   i16 descent;
   i16 widMax;
   i16 leading;
-  i16 lineHeight;
 } FontInfo;
 
 void SetFont(char *name);

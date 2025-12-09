@@ -3,30 +3,35 @@
 
 struct PageElement;
 typedef void (*PageElementDraw)(struct PageElement *el);
-typedef void (*PageElementInput)(struct PageElement *el, u16 input);
+typedef bool (*PageElementInput)(struct PageElement *el, u16 input);
 
 typedef struct PageElement {
   Rect bounds;
-  bool active;
   PageElementDraw draw;
   PageElementInput onInput;
-  struct PageElement *next;
+  struct PageElement *left;
+  struct PageElement *right;
+  struct PageElement *up;
+  struct PageElement *down;
 } PageElement;
 
-struct Page;
-typedef void (*PageInput)(struct Page *page, u16 input);
+typedef struct {
+  u32 count;
+  PageElement **items;
+} PageElementList;
 
-typedef struct Page {
+typedef struct {
   char *title;
-  PageElement *elements;
-  PageElement *focus;
+  PageElementList elements;
+  PageElement *selected;
 } Page;
 
-void InitPage(Page *page, char *title);
+void InitPage(Page *page, char *title, u32 numElements);
 void AddPageElement(Page *page, PageElement *element);
+void AddElementBelow(PageElement *above, PageElement *below);
+void AddElementBeside(PageElement *left, PageElement *right);
 void DrawPage(Page *page);
 void OnPageInput(Page *page, u16 input);
-void SelectNextElement(Page *page);
-void SelectPrevElement(Page *page);
 
 void InitPageElement(PageElement *el, Rect *bounds, PageElementDraw draw);
+void SelectElement(Page *page, PageElement *element);

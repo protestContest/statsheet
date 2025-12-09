@@ -1,22 +1,17 @@
 #pragma once
 #include "kit.h"
 
-typedef enum {simpleStat, modStat, abilityStat, hpStat, chargeStat} StatType;
-
-struct Stat;
-struct StatMap;
-typedef u32 (*StatCalc)(struct Stat *stat, struct StatMap *stats);
-
-typedef struct Stat {
-  StatType type;
-  char *name;
+typedef struct {
+  u32 id;
   i32 value;
-  i32 tempMod;
-  i32 max;
-  char *calculate;
+  u32 calcLen;
+  u8 *calc;
+  u32 numDeps;
+  u32 *deps;
 } Stat;
 
-void AddStat(Stat *stat, char *name, StatType type, u32 value);
+void InitStats(void);
 Stat *GetStat(char *name);
-void PrintStat(Stat *stat, Rect *bounds);
-void EditStat(Stat *stat, Rect *bounds);
+Stat *GetStatByID(u32 id);
+
+void UpdateStat(Stat *stat, i32 value);

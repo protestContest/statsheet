@@ -1,0 +1,51 @@
+Level: 6
+
+Speed: 30
+PB: 3
+
+STR: 9
+DEX: 12
+CON: 14
+INT: 18
+WIS: 14
+CHA: 10
+
+ModSTR = STR 2 / 5 -
+ModDEX = DEX 2 / 5 -
+ModCON = CON 2 / 5 -
+ModINT = INT 2 / 5 -
+ModWIS = WIS 2 / 5 -
+ModCHA = CHA 2 / 5 -
+
+MaxHP = ModCON 4 + Level * 2 + TmpMaxHP +
+TmpMaxHP: 0
+HP: MaxHP
+AC = 10 ModDEX + ArmorMod +
+ArmorMod: 0
+
+Initiative = ModDEX
+MeleeAttackMod = ModSTR PB +
+RangeAttackMod = ModDEX PB +
+SpellAttackMod = ModINT PB +
+SpellSaveDC = 8 ModINT + PB +
+PasvPercep = 10 Perception +
+
+Acrobatics = ModDEX
+AnimalHandling = ModWIS
+Arcana = ModINT PB +
+Athletics = ModSTR
+Deception = ModCHA
+History = ModINT PB +
+Insight = ModWIS
+Intimidation = ModCHA
+Investigation = ModINT PB 2 * +
+Medicine = ModWIS
+Nature = ModINT
+Perception = ModWIS
+Performance = ModCHA
+Persuasion = ModCHA
+Religion = ModINT
+SleightOfHand = ModDEX
+Stealth = ModDEX
+Survival = ModWIS
+
