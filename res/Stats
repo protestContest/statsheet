@@ -49,3 +49,9 @@ SleightOfHand = ModDEX
 Stealth = ModDEX
 Survival = ModWIS
 
+L1Slots = 4
+L1SlotsUsed: 4
+L2Slots = 3
+L2SlotsUsed: 0
+L3Slots = 4
+L3SlotsUsed: 0

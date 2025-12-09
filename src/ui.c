@@ -163,7 +163,7 @@ void PlaceCursor(i16 x, i16 y)
   PlaceObj(cursorObj, x-8, y-4);
 }
 
-static void DrawNum(i32 num, i16 x, i16 y, bool showSign)
+void DrawNum(i32 num, i16 x, i16 y, bool showSign)
 {
   char str[8] = {0};
   if (showSign && num >= 0) {
@@ -174,6 +174,26 @@ static void DrawNum(i32 num, i16 x, i16 y, bool showSign)
   }
   MoveTo(x - TextWidth(str), y);
   Print(str);
+}
+
+void DrawCharges(i32 used, i32 max, Rect *bounds)
+{
+  Rect r = *bounds;
+  r.bottom = r.top + 10;
+  SetColor(BLACK);
+  FrameRect(&r);
+  for (i32 i = 1; i < max; i++) {
+    MoveTo(r.left + 9*i, r.top);
+    Line(0, 9);
+  }
+  r.left += 2;
+  r.top += 2;
+  r.bottom = r.top + 6;
+  r.right = r.left + 6;
+  for (i32 i = 0; i < used; i++) {
+    FillRect(&r, BLACK);
+    OffsetRect(&r, 9, 0);
+  }
 }
 
 i32 EditNum(i32 num, Rect *bounds, bool showSign)
@@ -223,4 +243,51 @@ i32 EditNum(i32 num, Rect *bounds, bool showSign)
   FillRect(bounds, WHITE);
   DrawNum(num, x, y, showSign);
   return num;
+}
+
+i32 EditCharges(i32 used, i32 max, Rect *bounds)
+{
+  i32 original = used;
+  FontInfo info;
+  GetFontInfo(&info);
+  SetColor(BLACK);
+  InsetRect(bounds, -2, -2);
+  FrameRect(bounds);
+  InsetRect(bounds, 2, 2);
+
+  // FillRect(bounds, WHITE);
+  // DrawNum(num, x, y, showSign);
+
+  PlaceObj(arrowLeftObj, bounds->left - 7, bounds->top + 3);
+  SetObjDisplay(arrowLeftObj, ShowObj);
+  PlaceObj(arrowRightObj, bounds->right - 1, bounds->top + 3);
+  SetObjDisplay(arrowRightObj, ShowObj);
+
+  while (true) {
+    VSync();
+    u16 input = GetInput();
+    if (KeyPressed(BTN_A)) {
+      break;
+    } else if (KeyPressed(BTN_B) || KeyPressed(BTN_SELECT)) {
+      used = original;
+      break;
+    } else if (KeyPressed(BTN_LEFT) && used > 0) {
+      used--;
+    } else if (KeyPressed(BTN_RIGHT) && used < max) {
+      used++;
+    }
+    if (input & (BTN_LEFT | BTN_RIGHT)) {
+      FillRect(bounds, WHITE);
+      DrawCharges(used, max, bounds);
+    }
+  }
+
+  SetObjDisplay(arrowLeftObj, HideObj);
+  SetObjDisplay(arrowRightObj, HideObj);
+
+  InsetRect(bounds, -2, -2);
+  FillRect(bounds, WHITE);
+  DrawCharges(used, max, bounds);
+
+  return used;
 }
