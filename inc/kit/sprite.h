@@ -22,13 +22,15 @@ void SetPalette(u32 n, u8 *colors, u32 numColors, u32 depth);
 void SetPaletteColor(u32 palette, u32 index, u16 color);
 
 void InitObj(u32 obj);
-void PlaceObj(u32 obj, u16 x, u16 y);
+void PlaceObj(u32 obj, i16 x, i16 y);
 
-#define ShowObj   0x0
-#define TfmObj    0x1
-#define HideObj   0x2
-#define TfmDblObj 0x3
+#define ObjShow   0x0
+#define ObjTfm    0x1
+#define ObjHide   0x2
+#define ObjTfmDbl 0x3
 void SetObjDisplay(u32 obj, u32 display);
+#define ShowObj(obj) SetObjDisplay(obj, ObjShow)
+#define HideObj(obj) SetObjDisplay(obj, ObjHide)
 
 #define ObjModeNormal 0x0
 #define ObjModeAlpha  0x1
@@ -39,6 +41,8 @@ void SetObjColors(u32 obj, bool hicolor);
 
 void SetObjFlipH(u32 obj, bool flip);
 void SetObjFlipV(u32 obj, bool flip);
+
+void SetObjTfm(u32 obj, u8 attrNum);
 
 #define Obj8x8    0x0
 #define Obj16x16  0x4
@@ -57,6 +61,8 @@ void SetObjSize(u32 obj, u32 size);
 void SetObjSprite(u32 obj, u32 tile);
 void SetObjPriority(u32 obj, u32 priority);
 void SetObjPalette(u32 obj, u32 palette);
+
+void SetTfmScale(u8 tfm, i16 x, i16 y);
 
 void SetTiles(TGA *tga);
 

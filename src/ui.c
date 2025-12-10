@@ -2,23 +2,25 @@
 
 #define cursorObj 0
 
+#define arrowTile 512
+
 void InitUI(void)
 {
-  SpriteFrame arrowFrame = {512, 0, 0};
-  AnimatedSprite arrowLeft, arrowRight;
-  InitSprite(&arrowLeft, Obj8x8, 0, 1, &arrowFrame);
-  SetObjDisplay(arrowLeftObj, HideObj);
-  AssignSprite(arrowLeftObj, &arrowLeft);
+  InitObj(arrowLeftObj);
+  HideObj(arrowLeftObj);
+  SetObjSize(arrowLeftObj, Obj8x8);
+  SetObjSprite(arrowLeftObj, arrowTile);
   SetObjFlipH(arrowLeftObj, true);
-  InitSprite(&arrowRight, Obj8x8, 0, 1, &arrowFrame);
-  SetObjDisplay(arrowRightObj, HideObj);
-  AssignSprite(arrowRightObj, &arrowRight);
 
-  SpriteFrame cursorFrame = {512, 0, 0};
-  AnimatedSprite cursor;
-  InitSprite(&cursor, Obj8x8, 0, 1, &cursorFrame);
-  SetObjDisplay(cursorObj, HideObj);
-  AssignSprite(cursorObj, &cursor);
+  InitObj(arrowRightObj);
+  HideObj(arrowRightObj);
+  SetObjSize(arrowRightObj, Obj8x8);
+  SetObjSprite(arrowRightObj, arrowTile);
+
+  InitObj(cursorObj);
+  HideObj(cursorObj);
+  SetObjSize(cursorObj, Obj8x8);
+  SetObjSprite(cursorObj, arrowTile);
 }
 
 void ShowWindow(Rect *bounds)
@@ -119,25 +121,17 @@ void ShowWindow(Rect *bounds)
   LineTo(x+7, y+height-7);
 }
 
-void TextWindow(char *text, i16 x, i16 y)
+void TextWindow(char *text, Rect *bounds)
 {
-  Rect bounds;
   FontInfo finfo;
   GetFontInfo(&finfo);
-  i16 width = TextWidth(text) + 16;
-  i16 height = TextHeight(text) + 16;
 
-  bounds.left = x;
-  bounds.top = y;
-  bounds.right = bounds.left+width;
-  bounds.bottom = bounds.top+height;
-
-  ShowWindow(&bounds);
+  ShowWindow(bounds);
   SetColor(BLACK);
-  MoveTo(bounds.left + 9, bounds.top + 9 + finfo.ascent);
+  MoveTo(bounds->left + 9, bounds->top + 9 + finfo.ascent);
   Print(text);
   SetColor(WHITE);
-  MoveTo(bounds.left + 8, bounds.top + 8 + finfo.ascent);
+  MoveTo(bounds->left + 8, bounds->top + 8 + finfo.ascent);
   Print(text);
 }
 
@@ -145,22 +139,45 @@ void Alert(char *text)
 {
   i16 width = TextWidth(text) + 16;
   i16 height = TextHeight(text) + 16;
-  TextWindow(text, SCREEN_W/2 - width/2, SCREEN_H/2 - height/2);
+
+  Rect bounds;
+  bounds.left = SCREEN_W/2 - width/2;
+  bounds.top = SCREEN_H/2 - height/2;
+  bounds.right = bounds.left+width;
+  bounds.bottom = bounds.top+height;
+
+  TextWindow(text, &bounds);
+  WaitForInput();
+  FillRect(&bounds, BG);
 }
 
 void ShowCursor(void)
 {
-  SetObjDisplay(cursorObj, ShowObj);
+  ShowObj(cursorObj);
 }
 
 void HideCursor(void)
 {
-  SetObjDisplay(cursorObj, HideObj);
+  HideObj(cursorObj);
 }
 
 void PlaceCursor(i16 x, i16 y)
 {
   PlaceObj(cursorObj, x-8, y-4);
+}
+
+void ShowArrows(Rect *bounds)
+{
+  PlaceObj(arrowLeftObj, bounds->left - 7, bounds->top + (bounds->bottom - bounds->top)/2 - 4);
+  ShowObj(arrowLeftObj);
+  PlaceObj(arrowRightObj, bounds->right - 1, bounds->top + (bounds->bottom - bounds->top)/2 - 4);
+  ShowObj(arrowRightObj);
+}
+
+void HideArrows(void)
+{
+  HideObj(arrowLeftObj);
+  HideObj(arrowRightObj);
 }
 
 void DrawNum(i32 num, i16 x, i16 y, bool showSign)
@@ -209,13 +226,10 @@ i32 EditNum(i32 num, Rect *bounds, bool showSign)
   i16 x = bounds->right-1;
   i16 y = bounds->top+1+info.ascent;
 
-  FillRect(bounds, WHITE);
+  FillRect(bounds, BG);
   DrawNum(num, x, y, showSign);
 
-  PlaceObj(arrowLeftObj, bounds->left - 7, bounds->top + 3);
-  SetObjDisplay(arrowLeftObj, ShowObj);
-  PlaceObj(arrowRightObj, bounds->right - 1, bounds->top + 3);
-  SetObjDisplay(arrowRightObj, ShowObj);
+  ShowArrows(bounds);
 
   while (true) {
     VSync();
@@ -231,16 +245,14 @@ i32 EditNum(i32 num, Rect *bounds, bool showSign)
       num++;
     }
     if (input & (BTN_LEFT | BTN_RIGHT)) {
-      FillRect(bounds, WHITE);
+      FillRect(bounds, BG);
       DrawNum(num, x, y, showSign);
     }
   }
 
-  SetObjDisplay(arrowLeftObj, HideObj);
-  SetObjDisplay(arrowRightObj, HideObj);
-
+  HideArrows();
   InsetRect(bounds, -1, -1);
-  FillRect(bounds, WHITE);
+  FillRect(bounds, BG);
   DrawNum(num, x, y, showSign);
   return num;
 }
@@ -255,13 +267,10 @@ i32 EditCharges(i32 used, i32 max, Rect *bounds)
   FrameRect(bounds);
   InsetRect(bounds, 2, 2);
 
-  // FillRect(bounds, WHITE);
-  // DrawNum(num, x, y, showSign);
-
   PlaceObj(arrowLeftObj, bounds->left - 7, bounds->top + 3);
-  SetObjDisplay(arrowLeftObj, ShowObj);
+  ShowObj(arrowLeftObj);
   PlaceObj(arrowRightObj, bounds->right - 1, bounds->top + 3);
-  SetObjDisplay(arrowRightObj, ShowObj);
+  ShowObj(arrowRightObj);
 
   while (true) {
     VSync();
@@ -277,17 +286,25 @@ i32 EditCharges(i32 used, i32 max, Rect *bounds)
       used++;
     }
     if (input & (BTN_LEFT | BTN_RIGHT)) {
-      FillRect(bounds, WHITE);
+      FillRect(bounds, BG);
       DrawCharges(used, max, bounds);
     }
   }
 
-  SetObjDisplay(arrowLeftObj, HideObj);
-  SetObjDisplay(arrowRightObj, HideObj);
+  HideObj(arrowLeftObj);
+  HideObj(arrowRightObj);
 
   InsetRect(bounds, -2, -2);
-  FillRect(bounds, WHITE);
+  FillRect(bounds, BG);
+  InsetRect(bounds, 2, 2);
   DrawCharges(used, max, bounds);
 
   return used;
+}
+
+void HideAllObjs(void)
+{
+  for (u32 i = 0; i < 128; i++) {
+    HideObj(i);
+  }
 }

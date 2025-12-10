@@ -42,7 +42,7 @@ void InitObj(u32 obj)
   OAM[obj*4+2] = 0;
 }
 
-void PlaceObj(u32 obj, u16 x, u16 y)
+void PlaceObj(u32 obj, i16 x, i16 y)
 {
   OAM[obj*4] = SetBits(OAM[obj*4], 0x00FF, y);
   OAM[obj*4+1] = SetBits(OAM[obj*4+1], 0x01FF, x);
@@ -78,6 +78,12 @@ void SetObjFlipV(u32 obj, bool flip)
   OAM[obj*4+1] = SetBits(OAM[obj*4+1], 0x2000, flip << 13);
 }
 
+void SetObjTfm(u32 obj, u8 attrNum)
+{
+  OAM[obj*4+1] = SetBits(OAM[obj*4+1], 0x3E00, (attrNum & 0x1F) << 9);
+  SetObjDisplay(obj, ObjTfm);
+}
+
 void SetObjSize(u32 obj, u32 size)
 {
   OAM[obj*4] = SetBits(OAM[obj*4], 0xC000, size << 14);
@@ -97,6 +103,18 @@ void SetObjPriority(u32 obj, u32 priority)
 void SetObjPalette(u32 obj, u32 palette)
 {
   OAM[obj*4+2] = SetBits(OAM[obj*4+2], 0xF000, palette << 12);
+}
+
+#define PA(tfm) ((tfm)*32+3)
+#define PB(tfm) ((tfm)*32+7)
+#define PC(tfm) ((tfm)*32+11)
+#define PD(tfm) ((tfm)*32+15)
+void SetTfmScale(u8 tfm, i16 sx, i16 sy)
+{
+  OAM[PA(tfm)] = sx;
+  OAM[PB(tfm)] = 0;
+  OAM[PC(tfm)] = 0;
+  OAM[PD(tfm)] = sy;
 }
 
 void SetTiles(TGA *tga)

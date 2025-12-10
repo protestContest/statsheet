@@ -20,6 +20,7 @@ typedef enum {
   opNoop = ' ',
   opDefault = ':',
   opConst = '#',
+  opSmall = 128,
   opVar = '$',
   opAdd = '+',
   opSub = '-',
@@ -76,11 +77,15 @@ char *ParseCalculation(char **cur, char *end, StatDep **deps)
         num = num*10 + **cur - '0';
         (*cur)++;
       }
-      VecPush(code, opConst);
-      VecPush(code, num & 0xFF);
-      VecPush(code, (num >> 8) & 0xFF);
-      VecPush(code, (num >> 16) & 0xFF);
-      VecPush(code, (num >> 24) & 0xFF);
+      if (num < 128) {
+        VecPush(code, opSmall | (num & 0x7F));
+      } else {
+        VecPush(code, opConst);
+        VecPush(code, num & 0xFF);
+        VecPush(code, (num >> 8) & 0xFF);
+        VecPush(code, (num >> 16) & 0xFF);
+        VecPush(code, (num >> 24) & 0xFF);
+      }
       SkipSpaces(*cur, end);
     } else if (IsUppercase(**cur)) {
       char *start = *cur;

@@ -2,8 +2,12 @@
 #include "stat.h"
 #include "ui.h"
 #include "overview_page.h"
+#include "dice_page.h"
 
-void main(void)
+Page pages[2];
+u32 curPage = 0;
+
+int main(void)
 {
   EnableDebug();
   InitKit();
@@ -14,14 +18,25 @@ void main(void)
 
   InitStats();
 
-  Page overviewPage;
-  InitOverviewPage(&overviewPage);
+  InitOverviewPage(&pages[0]);
+  InitDicePage(&pages[1]);
 
-  DrawPage(&overviewPage);
+  HideAllObjs();
+  ActivatePage(&pages[curPage], true);
 
   while (true) {
     VSync();
     u16 input = GetInput();
-    OnPageInput(&overviewPage, input);
+    if (KeyPressed(BTN_L)) {
+      ActivatePage(&pages[curPage], false);
+      curPage = (curPage == 0) ? ArrayCount(pages)-1 : curPage-1;
+      ActivatePage(&pages[curPage], true);
+    } else if (KeyPressed(BTN_R)) {
+      ActivatePage(&pages[curPage], false);
+      curPage = (curPage + 1) % ArrayCount(pages);
+      ActivatePage(&pages[curPage], true);
+    } else {
+      OnPageInput(&pages[curPage], input);
+    }
   }
 }

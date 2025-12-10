@@ -93,7 +93,8 @@ start_vector:
     // Initialize Heap
     ldr     r0, =__HEAP_START__
     ldr     r1, =__HEAP_SIZE__
-    sub     r1, #4
+    lsr     r1, #2
+    sub     r1, #1
     neg     r1, r1
     str     r1, [r0]
 

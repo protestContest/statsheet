@@ -2,6 +2,17 @@
 #include "kit/mem.h"
 #include "kit/debug.h"
 
+void InitVec(Vec *vec, u32 itemSize, u32 capacity)
+{
+  vec->capacity = capacity;
+  vec->count = 0;
+  vec->itemSize = itemSize;
+  vec->items = 0;
+  if (capacity > 0) {
+    ResizeVec(vec, capacity);
+  }
+}
+
 void ResizeVec(Vec *vec, u32 capacity)
 {
   vec->capacity = capacity;

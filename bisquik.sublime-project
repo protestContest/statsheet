@@ -2,7 +2,7 @@
 	"folders":
 	[
 		{
-			"path": "."
+			"path": ".",
 		}
 	],
 	"build_systems":
@@ -20,13 +20,23 @@
 			[
 				{
 					"name": "Clean",
-					"cmd": ["make", "clean"]
+					"cmd": ["make", "clean"],
 				},
 				{
 					"name": "Run",
-					"cmd": ["make", "run"]
+					"cmd": ["make", "run"],
 				}
-			]
+			],
 		}
-	]
+	],
+	"settings":
+	{
+		"LSP":
+		{
+			"clangd":
+			{
+				"enabled": true
+			}
+		}
+	},
 }

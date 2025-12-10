@@ -32,7 +32,7 @@ DEFINES += -D__GBA__
 ARCH := -mcpu=arm7tdmi -mtune=arm7tdmi
 
 IFLAGS := -I$(INC_DIR) -include prefix.h
-WFLAGS := -Wall -Wextra -Werror -Wno-multichar -Wno-unused-parameter -Wno-main
+WFLAGS := -Wall -Wextra -Werror -Wno-multichar -Wno-unused-parameter -Wno-main -Wno-stringop-overread
 
 ASFLAGS += -x assembler-with-cpp $(DEFINES) $(ARCH) -mthumb -mthumb-interwork -ffunction-sections -fdata-sections
 CFLAGS += -std=c99 $(WFLAGS) $(DEFINES) $(ARCH) -mthumb -mthumb-interwork $(IFLAGS) -O3 -ffunction-sections -fdata-sections

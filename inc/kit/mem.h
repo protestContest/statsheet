@@ -5,10 +5,12 @@ numWords is rounded up to a multiple of 8
 numWords is a 20-bit uint
 src and dst must be word aligned
 */
+
 extern void BlockFill(void *src, void *dst, u32 numWords);
 extern void BlockCopy(void *src, void *dst, u32 numWords);
 
-void *Alloc(i32 size);
-void *Realloc(void *ptr, i32 size);
+void *Alloc(u32 size);
+void *Realloc(void *ptr, u32 size);
 void Free(void *ptr);
-void Copy(void *src, void *dst, u32 length);
+void Copy(void *src, void *dst, u32 size);
+#define CopyStr(s, dst) Copy(s, dst, StrLen(s))

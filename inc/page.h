@@ -15,18 +15,17 @@ typedef struct PageElement {
   struct PageElement *down;
 } PageElement;
 
-typedef struct {
-  u32 count;
-  PageElement **items;
-} PageElementList;
+struct Page;
+typedef void (*PageActivate)(struct Page *page, bool active);
 
-typedef struct {
+typedef struct Page {
   char *title;
-  PageElementList elements;
+  Vec elements;
   PageElement *selected;
+  PageActivate activate;
 } Page;
 
-void InitPage(Page *page, char *title, u32 numElements);
+void InitPage(Page *page, char *title);
 void AddPageElement(Page *page, PageElement *element);
 void AddElementBelow(PageElement *above, PageElement *below);
 void AddElementBeside(PageElement *left, PageElement *right);
@@ -35,3 +34,4 @@ void OnPageInput(Page *page, u16 input);
 
 void InitPageElement(PageElement *el, Rect *bounds, PageElementDraw draw);
 void SelectElement(Page *page, PageElement *element);
+void ActivatePage(Page *page, bool active);

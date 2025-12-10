@@ -52,7 +52,7 @@ void Error(char *msg)
 void AssertFail(char *file, u32 line)
 {
   char msg[256] = {0};
-  Copy("Assertion failed\n^:^", msg, 20);
+  CopyStr("Assertion failed\n^:^", msg);
   FormatStr(msg, file, 256);
   FormatInt(msg, line, 256);
   Error(msg);

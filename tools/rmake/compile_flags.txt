@@ -1,0 +1,4 @@
+-Wall
+-Iinc
+-include
+../../inc/prefix.h

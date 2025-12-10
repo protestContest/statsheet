@@ -1,0 +1,16 @@
+--target=arm-none-eabi
+-mcpu=arm7tdmi
+-mthumb
+-std=c99
+-D__GBA__
+-Iinc
+-include
+prefix.h
+-Wall
+-Wextra
+-Wno-multichar
+-Wno-unused-parameter
+-Wno-main
+-Wno-main-return-type
+-ffunction-sections
+-fdata-sections

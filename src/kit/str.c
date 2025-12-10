@@ -74,15 +74,14 @@ char *HexToString(i32 num, char *str)
 char *FormatStr(char *buf, char *str, u32 max)
 {
   u32 len = StrLen(str);
-  char *s = buf;
   while (max > 0) {
-    if (*s == '^') {
-      if (max < len) return buf;
-      Copy(s + 1, s + len, max - len);
-      Copy(str, s, len);
-      return s + len;
+    if (*buf == '^') {
+      if (max < len) return 0;
+      Copy(buf + 1, buf + len, max - len);
+      Copy(str, buf, len);
+      return buf + len;
     }
-    s++;
+    buf++;
     max--;
   }
   return buf;
@@ -91,14 +90,13 @@ char *FormatStr(char *buf, char *str, u32 max)
 char *FormatInt(char *buf, i32 num, u32 strLen)
 {
   u32 numDigits = NumDigits(num, 10);
-  char *s = buf;
   while (strLen > 0) {
-    if (*s == '^') {
-      if (strLen < numDigits) return buf;
-      Copy(s + 1, s + numDigits, strLen - numDigits);
-      return NumToString(num, s);
+    if (*buf == '^') {
+      if (strLen < numDigits) return 0;
+      Copy(buf + 1, buf + numDigits, strLen - numDigits);
+      return NumToString(num, buf);
     }
-    s++;
+    buf++;
     strLen--;
   }
   return buf;

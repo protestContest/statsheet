@@ -1,19 +1,17 @@
 #include "page.h"
 #include "ui.h"
 
-void InitPage(Page *page, char *title, u32 numElements)
+void InitPage(Page *page, char *title)
 {
   page->title = title;
-  page->elements.count = 0;
-  page->elements.items = Alloc(sizeof(PageElement*)*numElements);
-  Assert(page->elements.items);
+  InitVec(&page->elements, sizeof(PageElement*), 0);
   page->selected = 0;
+  page->activate = 0;
 }
 
 void AddPageElement(Page *page, PageElement *element)
 {
-  if (!page->elements.items) return;
-  page->elements.items[page->elements.count++] = element;
+  VecPush(&page->elements, &element);
 }
 
 void AddElementBelow(PageElement *above, PageElement *below)
@@ -25,6 +23,7 @@ void AddElementBelow(PageElement *above, PageElement *below)
   above->down = below;
   below->up = above;
 }
+
 void AddElementBeside(PageElement *left, PageElement *right)
 {
   if (left->right) {
@@ -37,8 +36,6 @@ void AddElementBeside(PageElement *left, PageElement *right)
 
 void DrawPage(Page *page)
 {
-  ClearScreen(WHITE);
-
   FontInfo info;
   GetFontInfo(&info);
   u32 width = TextWidth(page->title);
@@ -49,7 +46,8 @@ void DrawPage(Page *page)
   Print(page->title);
 
   for (u32 i = 0; i < page->elements.count; i++) {
-    page->elements.items[i]->draw(page->elements.items[i]);
+    PageElement **el = VecAt(&page->elements, i);
+    (*el)->draw(*el);
   }
 }
 
@@ -68,6 +66,7 @@ void OnPageInput(Page *page, u16 input)
   } else {
     Assert(page->selected->onInput);
     if (page->selected->onInput(page->selected, input)) {
+      ClearScreen(BG);
       DrawPage(page);
     }
   }
@@ -89,4 +88,17 @@ void InitPageElement(PageElement *el, Rect *bounds, PageElementDraw draw)
   el->right = 0;
   el->up = 0;
   el->down = 0;
+}
+
+void ActivatePage(Page *page, bool active)
+{
+  if (page->activate) {
+    page->activate(page, active);
+  }
+  if (active) {
+    ClearScreen(BG);
+    DrawPage(page);
+  } else {
+    HideAllObjs();
+  }
 }

@@ -1,100 +1,149 @@
 #include "kit/mem.h"
 #include "kit/debug.h"
+#include "kit/str.h"
+#include "prefix.h"
 
 /*
-The heap is divided into allocated blocks. Each block begins with a 32-bit header. If the header is
-positive, the block is allocated; if negative, the block is free. The absolute value of the header
-is the block size in words (not including the header).
+The heap is divided into free or allocated blocks. Each block begins with a 32-bit header. If the
+header is positive, the block is allocated, and the header defines the number of words allocated
+(not including the header). If the header is negative, the block is free, and the absolute value
+defines the number of words free. On startup, the heap is initialized to have one free block
+encompassing the entire 256K heap. A header of 0 should never occur - the space for that header
+should be absorbed into its preceding block.
 
-Allocation happens by first seeking to a free block, then gathering contiguous free blocks until
-enough space is claimed. The last free block (if not completely claimed) is split, and the claimed
-blocks are marked as one allocated block.
+Allocation happens by seeking a free block big enough to fit the requested size. Until one is found,
+the heap is scanned and any contiguous free blocks are gathered together. If the end of the heap is
+reached, a null pointer is returned. When a block big enough for allocation is found, it's split
+into an allocated block of the requested size and a free block of the remainder. A pointer to the
+block data is returned.
+
+Freeing happens by marking an allocated block as free (negating its header). To speed allocation,
+subsequent contiguous free blocks are gathered into the freed block (but not free blocks before).
+
+Reallocation has three possibilities:
+
+- If the new size is smaller than the allocated size, the block is shrunk. A new free block is added
+  after the allocated block.
+- If the new size is larger than the allocated size and there is enough free space after the
+  allocated block, the block is enlarged in place.
+- Otherwise, (or if the given pointer is null), a new block is allocated and the old one is freed.
 */
 
 extern i32 __HEAP_START__[];
 extern i32 __HEAP_END__[];
 
-static void Gather(i32 *cur)
-{
-  i32 *start = cur;
-  i32 blockSize = cur[-1];
-  i32 freeSize = 0;
+#define FirstBlock          (((i32*)__HEAP_START__)+1)
+#define BlockHeader(p)      (((i32*)(p))[-1])
+#define AllocSize(p)        BlockHeader(p)
+#define FreeSize(p)         (-BlockHeader(p))
+#define BlockFree(p)        (BlockHeader(p) < 0)
+#define NextBlock(p)        (((i32*)(p)) + (BlockFree(p) ? FreeSize(p) : AllocSize(p)) + 1)
+#define InHeap(p)           (((void*)(p)) < (void*)__HEAP_END__ && ((void*)(p)) >= (void*)__HEAP_START__)
+#define MarkFree(p, s)      do {BlockHeader(p) = -(s);} while(0)
+#define MarkAlloc(p, s)     do {BlockHeader(p) = (s);} while(0)
 
-  while (blockSize <= 0) {
-    freeSize += -blockSize + 1;
-    cur += -blockSize;
-    if (cur >= __HEAP_END__) break;
-    blockSize = *cur++;
+// combines contiguous free blocks together
+static void Gather(i32 *block)
+{
+  i32 *start = block;
+  u32 freeSize = 0;
+
+  while (InHeap(block) && BlockFree(block)) {
+    freeSize += FreeSize(block) + 1;
+    block = NextBlock(block);
   }
 
-  start[-1] = -(freeSize - 1);
+  if (freeSize > 0) {
+    MarkFree(start, freeSize-1);
+  }
 }
 
-static void *Seek(i32 *cur, i32 size)
+// find the next free block big enough to contain size. gathers free blocks together.
+static i32 *Seek(i32 *block, i32 size)
 {
-  while (cur < __HEAP_END__ && cur[-1] > 0) {
-    cur += cur[-1] + 1;
+  while (InHeap(block) && !BlockFree(block)) {
+    block = NextBlock(block);
   }
-  if (cur >= __HEAP_END__) return 0;
-
-  Gather(cur);
-
-  if (-cur[-1] < size) {
-    cur += -cur[-1] + 1;
-    return Seek(cur, size);
+  if (!InHeap(block)) {
+    Log("Heap exhausted");
+    return 0;
   }
 
-  return cur;
+  Gather(block);
+  if (FreeSize(block) < size) {
+    return Seek(NextBlock(block), size);
+  }
+
+  return block;
 }
 
-void *Alloc(i32 size)
+// splits a block into two, the first allocated, the second free
+// allocated size MUST NOT be greater than the block size
+static void SplitBlock(i32 *block, i32 size)
 {
-  i32 *ptr = __HEAP_START__;
-  i32 words = Align(size, 4) >> 2;
-
-  ptr = Seek(ptr + 1, words);
-  if (!ptr) return 0;
-
-  if (-ptr[-1] > words) {
-    ptr[words] = ptr[-1] + words + 1;
+  u32 blockSize = BlockFree(block) ? FreeSize(block) : AllocSize(block);
+  u32 leftover = blockSize - size;
+  if (leftover == 1) {
+    // absorb empty free block
+    leftover = 0;
+    size++;
   }
 
-  ptr[-1] = words;
-
-  return ptr;
+  MarkAlloc(block, size);
+  if (leftover > 0) {
+    // next block guaranteed to exist
+    MarkFree(NextBlock(block), leftover - 1);
+    Gather(NextBlock(block));
+  }
 }
 
-void *Realloc(void *ptr, i32 size)
+void *Alloc(u32 bytes)
 {
-  i32 *cur = (i32*)ptr;
-  i32 words = Align(size, 4) >> 2;
+  if (bytes == 0) return 0;
 
-  if (cur >= __HEAP_START__ && cur < __HEAP_END__) {
-    // same size
-    if (words == cur[-1]) return ptr;
+  i32 size = Align(bytes, 4)/4;  // convert size to words
+  i32 *block = Seek(FirstBlock, size);  // find block big enough
+  if (!block) return 0; // no big enough block found
 
-    // reduce size, add free block
-    if (words < cur[-1]) {
-      cur[words] = -(cur[-1] - words - 1);
-      cur[-1] = words;
+  SplitBlock(block, size);  // split block into allocated/free
+
+  return block;
+}
+
+void *Realloc(void *ptr, u32 bytes)
+{
+  if (bytes == 0) {
+    Free(ptr);
+    return 0;
+  }
+
+  i32 size = Align(bytes, 4)/4;
+
+  if (ptr) {
+    if (size == AllocSize(ptr)) {
       return ptr;
-    }
-
-    // big enough free block after, expand size
-    i32 needed = words - cur[-1];
-    if (cur[cur[-1]] < 0 && -cur[cur[-1]] >= needed + 1) {
-      u32 left = -cur[cur[-1]] - needed;
-      cur[words] = -left;
-      cur[-1] = words;
+    } else if (size < AllocSize(ptr)) {
+      // shrink in place
+      SplitBlock(ptr, size);
       return ptr;
+    } else {
+      i32 *next = NextBlock(ptr);
+      if (InHeap(next) && BlockFree(next)) {
+        Gather(next);
+        if (AllocSize(ptr) + FreeSize(next) + 1 >= size) {
+          // grow in place
+          MarkFree(ptr, AllocSize(ptr) + FreeSize(next) + 1);
+          SplitBlock(ptr, size);
+          return ptr;
+        }
+      }
     }
   }
 
-  // need new block
-  i32 *newBlock = Alloc(size);
+  void *newBlock = Alloc(bytes);
   if (!newBlock) return 0;
   if (ptr) {
-    Copy(ptr, newBlock, cur[-1]*4);
+    Copy(ptr, newBlock, AllocSize(ptr)*4);
     Free(ptr);
   }
   return newBlock;
@@ -102,10 +151,18 @@ void *Realloc(void *ptr, i32 size)
 
 void Free(void *ptr)
 {
-  i32 *cur = (i32*)ptr;
-  if (cur < __HEAP_START__ || cur >= __HEAP_END__) return;
-  cur[-1] = -cur[-1];
-  Gather(cur);
+  if (!InHeap(ptr) || BlockFree(ptr)) return;
+  MarkFree(ptr, AllocSize(ptr));
+  Gather(ptr);
+}
+
+static bool CanBlockCopy(void *src, void *dst, u32 size)
+{
+  if (size < 32) return false;
+  if ((u32)src != Align(src, 4)) return false;
+  if ((u32)dst != Align(dst, 4)) return false;
+  if (dst > src && dst < src + size) return false;
+  return true;
 }
 
 void Copy(void *src, void *dst, u32 size)
@@ -113,7 +170,7 @@ void Copy(void *src, void *dst, u32 size)
   u8 *srcBytes = (u8*)src;
   u8 *dstBytes = (u8*)dst;
 
-  if (size >= 32 && (u32)srcBytes == Align(srcBytes, 4) && (u32)dstBytes == Align(dstBytes, 4)) {
+  if (CanBlockCopy(src, dst, size)) {
     BlockCopy(srcBytes, dstBytes, size/4);
     srcBytes += size & ~3;
     dstBytes += size & ~3;
@@ -124,5 +181,9 @@ void Copy(void *src, void *dst, u32 size)
     return;
   }
 
-  for (u32 i = 0; i < size; i++) *dstBytes++ = *srcBytes++;
+  if (dst > src) {
+    for (u32 i = 0; i < size; i++) dstBytes[size-1-i] = srcBytes[size-1-i];
+  } else {
+    for (u32 i = 0; i < size; i++) *dstBytes++ = *srcBytes++;
+  }
 }

@@ -1,5 +1,4 @@
 #include "stat.h"
-#include "ui.h"
 
 typedef struct {
   HashMap map;
@@ -24,6 +23,7 @@ typedef enum {
   opNoop = ' ',
   opDefault = ':',
   opConst = '#',
+  opSmall = 128,
   opVar = '$',
   opAdd = '+',
   opSub = '-',
@@ -41,6 +41,12 @@ void CalcStat(Stat *stat)
   Stat *s;
 
   for (u32 i = 0; i < stat->calcLen; i++) {
+    if (stat->calc[i] & opSmall) {
+      Assert(top < ArrayCount(stack));
+      n = stat->calc[i] & ~opSmall;
+      stack[top++] = n;
+      continue;
+    }
     switch (stat->calc[i]) {
     case opNoop:
       break;
@@ -49,11 +55,13 @@ void CalcStat(Stat *stat)
       stat->calcLen = 0;
       break;
     case opConst:
+      Assert(top < ArrayCount(stack));
       Copy(stat->calc + i + 1, &n, sizeof(u32));
       stack[top++] = n;
       i += 4;
       break;
     case opVar:
+      Assert(top < ArrayCount(stack));
       Copy(stat->calc + i + 1, &n, sizeof(u32));
       Assert(HashMapFetch(&statMap, n, &index));
       s = VecAt(&statList, index);
@@ -98,6 +106,7 @@ void InitStats(void)
   u32 numStats = *((u32*)statData);
   statData += sizeof(u32);
 
+  // set vec size to hold all stats, so it won't resize later
   ResizeVec(&statList, numStats);
 
   for (u32 i = 0; i < numStats; i++) {
@@ -137,39 +146,45 @@ Stat *GetStatByID(u32 id)
   return 0;
 }
 
-void StatListAppend(StatList *list, Stat *stat)
-{
-  while (list->next) list = list->next;
-  list->next = Alloc(sizeof(StatList));
-  list->next->stat = stat;
-  list->next->next = 0;
-}
-
-void UpdateStatRec(StatList *queue)
+void UpdateStatRec(StatList *queue, StatList *end)
 {
   Stat *stat = queue->stat;
+
   for (u32 i = 0; i < stat->numDeps; i++) {
-    u32 dep = stat->deps[i];
-    Stat *child = GetStatByID(dep);
+    u32 depID = stat->deps[i];
+    Stat *child = GetStatByID(depID);
+    i32 oldValue = child->value;
     CalcStat(child);
-    StatListAppend(queue, child);
+
+    if (child->value != oldValue) {
+      StatList *childNode = Alloc(sizeof(StatList));
+      childNode->stat = child;
+      childNode->next = 0;
+      end->next = childNode;
+      end = childNode;
+    }
   }
 
   StatList *oldQueue = queue;
   queue = queue->next;
   Free(oldQueue);
+
   if (queue) {
-    UpdateStatRec(queue);
+    UpdateStatRec(queue, end);
   }
 }
 
-void UpdateStat(Stat *stat, i32 value)
+bool UpdateStat(Stat *stat, i32 value)
 {
+  if (stat->value == value) return false;
   stat->value = value;
   if (stat->numDeps > 0) {
     StatList *queue = Alloc(sizeof(StatList));
+
     queue->stat = stat;
     queue->next = 0;
-    UpdateStatRec(queue);
+    UpdateStatRec(queue, queue);
+    return true;
   }
+  return false;
 }
