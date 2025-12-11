@@ -3,10 +3,11 @@
 
 void InitPage(Page *page, char *title)
 {
+  Rect bounds = {0, 0, SCREEN_W, SCREEN_H};
+  InitView(&page->asView, &bounds, DrawPage, PageInput, ActivatePage);
   page->title = title;
   InitVec(&page->elements, sizeof(PageElement*), 0);
   page->selected = 0;
-  page->activate = 0;
 }
 
 void AddPageElement(Page *page, PageElement *element)
@@ -14,28 +15,16 @@ void AddPageElement(Page *page, PageElement *element)
   VecPush(&page->elements, &element);
 }
 
-void AddElementBelow(PageElement *above, PageElement *below)
+void SelectElement(Page *page, PageElement *element)
 {
-  if (above->down) {
-    above->down->up = below;
-    below->down = above->down;
-  }
-  above->down = below;
-  below->up = above;
+  page->selected = element;
+  PlaceCursor(element->asView.bounds.left, element->asView.bounds.top + 7);
+  ShowCursor();
 }
 
-void AddElementBeside(PageElement *left, PageElement *right)
+void DrawPage(View *view)
 {
-  if (left->right) {
-    left->right->left = right;
-    right->right = left->right;
-  }
-  left->right = right;
-  right->left = left;
-}
-
-void DrawPage(Page *page)
-{
+  Page *page = (Page*)view;
   FontInfo info;
   GetFontInfo(&info);
   u32 width = TextWidth(page->title);
@@ -46,13 +35,14 @@ void DrawPage(Page *page)
   Print(page->title);
 
   for (u32 i = 0; i < page->elements.count; i++) {
-    PageElement **el = VecAt(&page->elements, i);
+    View **el = VecAt(&page->elements, i);
     (*el)->draw(*el);
   }
 }
 
-void OnPageInput(Page *page, u16 input)
+void PageInput(View *view, u16 input)
 {
+  Page *page = (Page*)view;
   if (!page->selected) return;
 
   if (KeyPressed(BTN_LEFT) && page->selected->left) {
@@ -64,41 +54,24 @@ void OnPageInput(Page *page, u16 input)
   } else if (KeyPressed(BTN_DOWN) && page->selected->down) {
     SelectElement(page, page->selected->down);
   } else {
-    Assert(page->selected->onInput);
-    if (page->selected->onInput(page->selected, input)) {
-      ClearScreen(BG);
-      DrawPage(page);
-    }
+    page->selected->asView.onInput(&page->selected->asView, input);
   }
 }
 
-void SelectElement(Page *page, PageElement *element)
+void ActivatePage(View *view, bool active)
 {
-  page->selected = element;
-  PlaceCursor(element->bounds.left, element->bounds.top + 7);
-  ShowCursor();
-}
+  Page *page = (Page*)view;
 
-void InitPageElement(PageElement *el, Rect *bounds, PageElementDraw draw)
-{
-  el->bounds = *bounds;
-  el->draw = draw;
-  el->onInput = 0;
-  el->left = 0;
-  el->right = 0;
-  el->up = 0;
-  el->down = 0;
-}
-
-void ActivatePage(Page *page, bool active)
-{
-  if (page->activate) {
-    page->activate(page, active);
-  }
   if (active) {
     ClearScreen(BG);
-    DrawPage(page);
+    DrawPage(view);
   } else {
     HideAllObjs();
+  }
+
+  if (page->selected) {
+    if (page->selected->asView.activate) {
+      page->selected->asView.activate(&page->selected->asView, active);
+    }
   }
 }

@@ -15,6 +15,7 @@ void *GetResource(char *name)
       return ((u8*)resFile) + resFile->resMap[i].offset;
     }
   }
+  Assert(false);
   return 0;
 }
 

@@ -22,21 +22,21 @@ int main(void)
   InitDicePage(&pages[1]);
 
   HideAllObjs();
-  ActivatePage(&pages[curPage], true);
+  pages[curPage].asView.activate(&pages[curPage].asView, true);
 
   while (true) {
     VSync();
     u16 input = GetInput();
     if (KeyPressed(BTN_L)) {
-      ActivatePage(&pages[curPage], false);
+      pages[curPage].asView.activate(&pages[curPage].asView, false);
       curPage = (curPage == 0) ? ArrayCount(pages)-1 : curPage-1;
-      ActivatePage(&pages[curPage], true);
+      pages[curPage].asView.activate(&pages[curPage].asView, true);
     } else if (KeyPressed(BTN_R)) {
-      ActivatePage(&pages[curPage], false);
+      pages[curPage].asView.activate(&pages[curPage].asView, false);
       curPage = (curPage + 1) % ArrayCount(pages);
-      ActivatePage(&pages[curPage], true);
+      pages[curPage].asView.activate(&pages[curPage].asView, true);
     } else {
-      OnPageInput(&pages[curPage], input);
+      pages[curPage].asView.onInput(&pages[curPage].asView, input);
     }
   }
 }

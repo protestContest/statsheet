@@ -1,7 +1,7 @@
 #include "elements.h"
 #include "ui.h"
 
-static void DrawLabel(PageElement *el)
+static void DrawLabel(View *el)
 {
   Label *label = (Label*)el;
   FontInfo info;
@@ -16,19 +16,15 @@ static void DrawLabel(PageElement *el)
 PageElement *NewLabel(Rect *bounds, char *title)
 {
   Label *label = Alloc(sizeof(Label));
-  InitPageElement(&label->el, bounds, DrawLabel);
+  InitPageElement(&label->asElement, bounds, DrawLabel, 0);
   label->title = title;
   return (PageElement*)label;
 }
 
-static void DrawButton(PageElement *el)
+static void DrawButtonUp(Rect *bounds)
 {
-  Label *label = (Label*)el;
-  FontInfo info;
-  GetFontInfo(&info);
-
-  Rect r = el->bounds;
-  SetColor(RGB(55, 55, 55));
+  Rect r = *bounds;
+  SetColor(RGB(48, 48, 48));
   MoveTo(r.left, r.bottom-3);
   LineTo(r.left, r.top+2);
   LineTo(r.left+2, r.top);
@@ -39,34 +35,84 @@ static void DrawButton(PageElement *el)
   LineTo(r.right-3, r.bottom-1);
   LineTo(r.left+2, r.bottom-1);
   InsetRect(&r, 1, 1);
-  SetColor(RGB(134, 134, 134));
+  SetColor(RGB(128, 128, 128));
   MoveTo(r.left, r.bottom-2);
   LineTo(r.left, r.top+1);
   LineTo(r.left+1, r.top);
   LineTo(r.right-2, r.top);
-  SetColor(RGB(55, 55, 55));
+  SetColor(RGB(48, 48, 48));
   LineTo(r.right-1, r.top+1);
   LineTo(r.right-1, r.bottom-2);
   LineTo(r.right-2, r.bottom-1);
   LineTo(r.left, r.bottom-1);
   InsetRect(&r, 1, 1);
   FillRect(&r, RGB(90, 90, 90));
+}
 
-  MoveTo((el->bounds.right+el->bounds.left)/2 - TextWidth(label->title)/2,
+static void DrawButtonDown(Rect *bounds)
+{
+  Rect r = *bounds;
+  SetColor(RGB(48, 48, 48));
+  MoveTo(r.left, r.bottom-3);
+  LineTo(r.left, r.top+2);
+  LineTo(r.left+2, r.top);
+  LineTo(r.right-3, r.top);
+  LineTo(r.right-1, r.top+2);
+  LineTo(r.right-1, r.bottom-2);
+  LineTo(r.right-3, r.bottom-1);
+  LineTo(r.left+2, r.bottom-1);
+  SetColor(BLACK);
+  MoveTo(r.left+1, r.bottom-2);
+  LineTo(r.left+1, r.top+2);
+  LineTo(r.left+2, r.top+1);
+  LineTo(r.right-3, r.top+1);
+  SetColor(RGB(128, 128, 128));
+  MoveTo(r.right-2, r.top+2);
+  LineTo(r.right-2, r.bottom-3);
+  LineTo(r.right-3, r.bottom-2);
+  LineTo(r.left+2, r.bottom-2);
+  InsetRect(&r, 2, 2);
+  FillRect(&r, RGB(90, 90, 90));
+}
+
+static void DrawButton(View *el)
+{
+  Button *button = (Button*)el;
+  if (button->active) {
+    DrawButtonDown(&el->bounds);
+  } else {
+    DrawButtonUp(&el->bounds);
+  }
+
+  FontInfo info;
+  GetFontInfo(&info);
+  MoveTo((el->bounds.right+el->bounds.left)/2 - TextWidth(button->title)/2,
          (el->bounds.bottom+el->bounds.top)/2 - (info.ascent+info.descent)/2 + info.ascent);
   SetColor(WHITE);
-  Print(label->title);
+  Print(button->title);
+}
+
+void ButtonInput(View *el, u16 input)
+{
+  Button *button = (Button*)el;
+  button->active = (input & BTN_A) ? true : false;
+
+  if (KeyPressed(BTN_A) || KeyReleased(BTN_A)) {
+    FillRect(&el->bounds, BG);
+    DrawButton(el);
+  }
 }
 
 PageElement *NewButton(Rect *bounds, char *title)
 {
-  Label *label = Alloc(sizeof(Label));
-  InitPageElement(&label->el, bounds, DrawButton);
-  label->title = title;
-  return (PageElement*)label;
+  Button *button = Alloc(sizeof(Button));
+  InitPageElement(&button->asElement, bounds, DrawButton, ButtonInput);
+  button->title = title;
+  button->active = false;
+  return (PageElement*)button;
 }
 
-static void DrawHPElement(PageElement *el)
+static void DrawHPElement(View *el)
 {
   MaxStatElement *hpEl = (MaxStatElement*)el;
   FontInfo info;
@@ -84,7 +130,7 @@ static void DrawHPElement(PageElement *el)
   Print(str);
 }
 
-static bool HPElementInput(PageElement *el, u16 input)
+static void HPElementInput(View *el, u16 input)
 {
   MaxStatElement *statEl = (MaxStatElement*)el;
   if (KeyPressed(BTN_SELECT)) {
@@ -93,7 +139,8 @@ static bool HPElementInput(PageElement *el, u16 input)
     bounds.right = bounds.left + TextWidth("00");
     i32 newValue = EditNum(statEl->stat->value, &bounds, false);
     if (UpdateStat(statEl->stat, newValue)) {
-      return true;
+      // todo: redraw page
+      return;
     }
 
     if (KeyPressed(BTN_SELECT)) {
@@ -102,19 +149,18 @@ static bool HPElementInput(PageElement *el, u16 input)
       newValue = EditNum(statEl->tmp->value, &bounds, true);
       FillRect(&bounds, BG);
       if (UpdateStat(statEl->tmp, newValue)) {
-        return true;
+        // todo: redraw apge
+        return;
       }
     }
     DrawHPElement(el);
   }
-  return false;
 }
 
 PageElement *NewHPElement(Rect *bounds, char *title)
 {
   MaxStatElement *hpEl = Alloc(sizeof(MaxStatElement));
-  InitPageElement(&hpEl->el, bounds, DrawHPElement);
-  hpEl->el.onInput = HPElementInput;
+  InitPageElement(&hpEl->asElement, bounds, DrawHPElement, HPElementInput);
   hpEl->title = title;
   hpEl->stat = GetStat("HP");
   Assert(hpEl->stat);
@@ -125,7 +171,7 @@ PageElement *NewHPElement(Rect *bounds, char *title)
   return (PageElement*)hpEl;
 }
 
-static void DrawStatElement(PageElement *el)
+static void DrawStatElement(View *el)
 {
   StatElement *statEl = (StatElement*)el;
   FontInfo info;
@@ -142,7 +188,7 @@ static void DrawStatElement(PageElement *el)
   Print(str);
 }
 
-static bool StatElementInput(PageElement *el, u16 input)
+static void StatElementInput(View *el, u16 input)
 {
   StatElement *statEl = (StatElement*)el;
   if (KeyPressed(BTN_SELECT)) {
@@ -151,17 +197,15 @@ static bool StatElementInput(PageElement *el, u16 input)
     Stat *stat = statEl->tmp ? statEl->tmp : statEl->stat;
     i32 newValue = EditNum(stat->value, &bounds, statEl->tmp ? true : false);
     if (UpdateStat(stat, newValue)) {
-      return true;
+      // todo: redraw
     }
   }
-  return false;
 }
 
 PageElement *NewStatElement(Rect *bounds, char *title, char *statName, char *tmpName)
 {
   StatElement *el = Alloc(sizeof(StatElement));
-  InitPageElement(&el->el, bounds, DrawStatElement);
-  el->el.onInput = StatElementInput;
+  InitPageElement(&el->asElement, bounds, DrawStatElement, StatElementInput);
   el->title = title;
   el->stat = GetStat(statName);
   Assert(el->stat);
@@ -174,7 +218,7 @@ PageElement *NewStatElement(Rect *bounds, char *title, char *statName, char *tmp
   return (PageElement*)el;
 }
 
-static void DrawAbilityElement(PageElement *el)
+static void DrawAbilityElement(View *el)
 {
   StatElement *statEl = (StatElement*)el;
   FontInfo info;
@@ -200,7 +244,7 @@ static void DrawAbilityElement(PageElement *el)
   Print(str);
 }
 
-static bool AbilityElementInput(PageElement *el, u16 input)
+static void AbilityElementInput(View *el, u16 input)
 {
   StatElement *statEl = (StatElement*)el;
   if (KeyPressed(BTN_SELECT)) {
@@ -210,21 +254,20 @@ static bool AbilityElementInput(PageElement *el, u16 input)
     i32 newValue = EditNum(statEl->stat->value, &bounds, false);
 
     if (UpdateStat(statEl->stat, newValue)) {
-      return true;
+      // todo: redraw page
     }
   }
-  return false;
 }
 
 PageElement *NewAbilityStatElement(Rect *bounds, char *title, char *statName, char *modName)
 {
   PageElement *el = NewStatElement(bounds, title, statName, modName);
-  el->onInput = AbilityElementInput;
-  el->draw = DrawAbilityElement;
+  el->asView.onInput = AbilityElementInput;
+  el->asView.draw = DrawAbilityElement;
   return el;
 }
 
-static void DrawChargeElement(PageElement *el)
+static void DrawChargeElement(View *el)
 {
   ChargeElement *chEl = (ChargeElement*)el;
   FontInfo info;
@@ -242,7 +285,7 @@ static void DrawChargeElement(PageElement *el)
   DrawCharges(chEl->stat->value, max, &bounds);
 }
 
-static bool ChargeElementInput(PageElement *el, u16 input)
+static void ChargeElementInput(View *el, u16 input)
 {
   FontInfo info;
   GetFontInfo(&info);
@@ -255,21 +298,90 @@ static bool ChargeElementInput(PageElement *el, u16 input)
     bounds.top = bounds.bottom - 10;
     i32 newValue = EditCharges(chEl->stat->value, max, &bounds);
     if (UpdateStat(chEl->stat, newValue)) {
-      return true;
+      // todo: redraw page
     }
   }
-  return false;
 }
 
 PageElement *NewChargeElement(Rect *bounds, char *title, char *statName, char *maxStatName)
 {
   ChargeElement *el = Alloc(sizeof(ChargeElement));
-  InitPageElement(&el->el, bounds, DrawChargeElement);
-  el->el.onInput = ChargeElementInput;
+  InitPageElement(&el->asElement, bounds, DrawChargeElement, ChargeElementInput);
   el->title = title;
   el->stat = GetStat(statName);
   Assert(el->stat);
   el->max = GetStat(maxStatName);
   Assert(el->max);
   return (PageElement*)el;
+}
+
+#define diceObj   3
+#define numDice   6
+static u32 diceSides[] = {     4,      6,      8,      10,      12,      20};
+static char *diceImgs[] = {
+  "d4.tga",
+  "d6.tga",
+  "d8.tga",
+  "d10.tga",
+  "d12.tga",
+  "d20.tga"
+};
+static void LoadDice(u32 index, AnimatedSprite *sprite)
+{
+  TGA *tiles = ResData(GetResource(diceImgs[index]));
+
+  SetPalette(1, (u8*)tiles->data, tiles->paletteSize, tiles->paletteDepth);
+  SetObjPalette(diceObj, 1);
+
+  Rect r = {0, 0, 64, 48};
+  LoadTiles(tiles, &r, sprite->frames[0].baseTile);
+  OffsetRect(&r, 64, 0);
+  LoadTiles(tiles, &r, sprite->frames[1].baseTile);
+  OffsetRect(&r, 64, 0);
+  LoadTiles(tiles, &r, sprite->frames[2].baseTile);
+  OffsetRect(&r, 64, 0);
+  LoadTiles(tiles, &r, sprite->frames[3].baseTile);
+  AssignSprite(diceObj, sprite);
+  PlaceObj(diceObj, SCREEN_W/2-48/2, SCREEN_H/2-48/2);
+}
+
+static void DrawDiceElement(View *el)
+{
+  ShowObj(diceObj);
+  ShowArrows(&el->bounds);
+}
+
+static void DiceElementInput(View *el, u16 input)
+{
+  DiceElement *diceEl = (DiceElement*)el;
+
+  if (KeyPressed(BTN_LEFT)) {
+    diceEl->curDie = (diceEl->curDie > 0) ? diceEl->curDie-1 : numDice-1;
+  } else if (KeyPressed(BTN_RIGHT)) {
+    diceEl->curDie = (diceEl->curDie + 1) % numDice;
+  }
+  if (input & (BTN_LEFT | BTN_RIGHT)) {
+    LoadDice(diceEl->curDie, diceEl->sprite);
+  }
+}
+
+PageElement *NewDiceElement(Rect *bounds, AnimatedSprite *sprite)
+{
+  DiceElement *el = Alloc(sizeof(DiceElement));
+  InitPageElement(&el->asElement, bounds, DrawDiceElement, DiceElementInput);
+  el->curDie = 5;
+  el->sprite = sprite;
+  LoadDice(el->curDie, sprite);
+  return (PageElement*)el;
+}
+
+u32 RollDice(DiceElement *el)
+{
+  u32 end = TickCount() + 30;
+  while (TickCount() < end) {
+    UpdateSprite(diceObj);
+  }
+  SetSpriteFrame(diceObj, 0);
+
+  return RandomBetween(0, diceSides[el->curDie]);
 }

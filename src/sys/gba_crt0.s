@@ -1,7 +1,3 @@
-// SPDX-License-Identifier: CC0-1.0
-//
-// SPDX-FileContributor: Antonio Niño Díaz, 2022
-
     .section    .gba_crt0, "ax"
     .global     entrypoint
     .cpu        arm7tdmi

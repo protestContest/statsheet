@@ -1,79 +1,53 @@
 #include "dice_page.h"
 #include "elements.h"
+#include "kit/input.h"
+#include "kit/sprite.h"
 #include "ui.h"
 
-#define diceObj   3
-#define d6Tile    516
-#define d8Tile    532
-#define d10Tile   548
-#define d12Tile   564
-#define d20Tile   580
-#define d4Tile    596
+static SpriteFrame diceFrames[] = {
+  {612, 0, 0},
+  {676, 0, 0},
+  {740, 0, 0},
+  {804, 0, 0}
+};
+static AnimatedSprite diceSprite;
 
-static u32 diceTiles[] = {d4Tile, d6Tile, d8Tile, d10Tile, d12Tile, d20Tile};
-static u32 diceSides[] = {     4,      6,      8,      10,      12,      20};
-
-typedef struct {
-  PageElement el;
-  u32 curDie;
-} DiceElement;
-
-static void DrawDiceElement(PageElement *el)
+static void DicePageInput(View *view, u16 input)
 {
-  PlaceObj(diceObj, el->bounds.left, el->bounds.top);
-  SetObjTfm(diceObj, 0);
-  SetObjDisplay(diceObj, ObjTfmDbl);
-  ShowArrows(&el->bounds);
-}
+  Page *page = (Page*)view;
+  DiceElement *diceEl = *(DiceElement**)VecAt(&page->elements, 0);
+  Button *button = *(Button**)VecAt(&page->elements, 1);
 
-static void RollDice(u32 sides)
-{
-  u32 n = RandomBetween(0, sides);
-  char numStr[8] = {0};
-  NumToString(n+1, numStr);
-  HideAllObjs();
-  Alert(numStr);
-}
+  diceEl->asElement.asView.onInput(&diceEl->asElement.asView, input);
+  button->asElement.asView.onInput(&button->asElement.asView, input);
 
-static bool DiceElementInput(PageElement *el, u16 input)
-{
-  DiceElement *diceEl = (DiceElement*)el;
+  if (KeyReleased(BTN_A)) {
+    u32 n = RollDice(diceEl);
+    char numStr[8] = {0};
+    NumToString(n+1, numStr);
 
-  if (KeyPressed(BTN_A)) {
-    RollDice(diceSides[diceEl->curDie]);
-    SetObjDisplay(diceObj, ObjTfmDbl);
-    ShowArrows(&el->bounds);
-  } else if (KeyPressed(BTN_LEFT)) {
-    diceEl->curDie = (diceEl->curDie > 0) ? diceEl->curDie-1 : ArrayCount(diceTiles)-1;
-  } else if (KeyPressed(BTN_RIGHT)) {
-    diceEl->curDie = (diceEl->curDie + 1) % ArrayCount(diceTiles);
+    u32 top = 20;
+    u32 wHeight = 30;
+    u32 wWidth = 40;
+    Rect bounds = {SCREEN_W/2-wWidth/2, top, SCREEN_W/2+wWidth/2, top+wHeight};
+    ShowWindow(&bounds);
+    FontInfo info;
+    GetFontInfo(&info);
+    MoveTo(SCREEN_W/2 - TextWidth(numStr)/2, top+wHeight/2 - (info.ascent+info.descent)/2 + info.ascent);
+    SetColor(WHITE);
+    Print(numStr);
   }
-  if (input & (BTN_LEFT | BTN_RIGHT)) {
-    SetObjSprite(diceObj, diceTiles[diceEl->curDie]);
-  }
-  return false;
-}
-
-PageElement *NewDiceElement(Rect *bounds)
-{
-  DiceElement *el = Alloc(sizeof(DiceElement));
-  InitPageElement(&el->el, bounds, DrawDiceElement);
-  el->el.onInput = DiceElementInput;
-  el->curDie = 5;
-  SetObjSprite(diceObj, diceTiles[el->curDie]);
-  return (PageElement*)el;
 }
 
 void InitDicePage(Page *page)
 {
   InitPage(page, "Dice");
+  page->asView.onInput = DicePageInput;
 
-  HideObj(diceObj);
-  SetObjSize(diceObj, Obj32x32);
-  SetTfmScale(0, 0x80, 0x80);
+  InitSprite(&diceSprite,    Obj64x64, 2, ArrayCount(diceFrames), diceFrames);
 
   Rect bounds = {SCREEN_W/2-32, SCREEN_H/2-32, SCREEN_W/2+32, SCREEN_H/2+32};
-  PageElement *diceEl = NewDiceElement(&bounds);
+  PageElement *diceEl = NewDiceElement(&bounds, &diceSprite);
   AddPageElement(page, diceEl);
   SelectElement(page, diceEl);
 

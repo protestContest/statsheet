@@ -117,23 +117,53 @@ void SetTfmScale(u8 tfm, i16 sx, i16 sy)
   OAM[PD(tfm)] = sy;
 }
 
-void SetTiles(TGA *tga)
+void LoadTiles(TGA *tga, Rect *src, u32 tileNum)
 {
+  // Given a rect describing the source pixels, copies the pixel data into CRAM.
+  // CRAM is laid out in sequential 8x8 tiles.
+
   u8 *pixels = ((u8*)tga->data) + tga->paletteSize*tga->paletteDepth/8;
   u32 width = tga->width;
 
-  u32 *tileWords = (u32*)CRAM;
-  for (u32 tile = 0; tile < 32*16; tile++) {
-    for (u32 tileRow = 0; tileRow < 8; tileRow++) {
-      u8 *row = pixels + tile/32*width*8 + tileRow*width + (tile%32)*8;
-      u32 word = 0;
-      for (u32 i = 0; i < 8; i++) {
-        word |= row[i] << 4*i;
-      }
+  // Calculate number of tiles in the source rect
+  u32 tilesWide = (src->right - src->left) / 8;
+  u32 tilesHigh = (src->bottom - src->top) / 8;
 
-      tileWords[tile*8 + tileRow] = word;
+  u32 *tileWords = (u32*)CRAM;
+  for (u32 ty = 0; ty < tilesHigh; ty++) {
+    for (u32 tx = 0; tx < tilesWide; tx++) {
+      u32 destTile = tileNum + ty*tilesWide + tx;
+      for (u32 tileRow = 0; tileRow < 8; tileRow++) {
+        u8 *row = pixels + (src->top + ty*8 + tileRow)*width + src->left + tx*8;
+        u32 word = 0;
+        for (u32 i = 0; i < 8; i++) {
+          word |= row[i] << 4*i;
+        }
+        tileWords[destTile*8 + tileRow] = word;
+      }
     }
   }
+}
+
+void SetTiles(TGA *tga)
+{
+  Rect r = {0, 0, tga->width, tga->height};
+  LoadTiles(tga, &r, 512);
+  // u32 width = tga->width;
+
+  // u8 *pixels = ((u8*)tga->data) + tga->paletteSize*tga->paletteDepth/8;
+  // u32 *tileWords = (u32*)CRAM;
+  // for (u32 tile = 0; tile < 32*16; tile++) {
+  //   for (u32 tileRow = 0; tileRow < 8; tileRow++) {
+  //     u8 *row = pixels + tile/32*width*8 + tileRow*width + (tile%32)*8;
+  //     u32 word = 0;
+  //     for (u32 i = 0; i < 8; i++) {
+  //       word |= row[i] << 4*i;
+  //     }
+
+  //     tileWords[tile*8 + tileRow] = word;
+  //   }
+  // }
 }
 
 static void SetSpriteFlip(u32 obj, AnimatedSprite *sprite)
@@ -188,6 +218,15 @@ bool UpdateSprite(u32 obj)
   }
 
   return false;
+}
+
+void SetSpriteFrame(u32 obj, u32 frame)
+{
+  if (!objSprites[obj]) return;
+  AnimatedSprite *sprite = objSprites[obj];
+  sprite->curFrame = frame % sprite->numFrames;
+  SetObjSprite(obj, sprite->frames[sprite->curFrame].baseTile);
+  SetSpriteFlip(obj, sprite);
 }
 
 void UpdateSprites(void)

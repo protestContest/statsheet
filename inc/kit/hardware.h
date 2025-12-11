@@ -192,6 +192,6 @@ extern void VBlankIntrWait(void);
 
 // Objects
 #define OAM             ((volatile u16*)0x07000000)
-#define CRAM            ((volatile u16*)0x06014000)
+#define CRAM            ((volatile u16*)0x06010000)
 #define BG_PALETTE      ((volatile u16*)0x05000000)
 #define OBJ_PALETTE     ((volatile u16*)0x05000200)

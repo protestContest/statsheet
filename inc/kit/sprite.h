@@ -64,9 +64,11 @@ void SetObjPalette(u32 obj, u32 palette);
 
 void SetTfmScale(u8 tfm, i16 x, i16 y);
 
+void LoadTiles(TGA *tga, Rect *src, u32 tileNum);
 void SetTiles(TGA *tga);
 
 void InitSprite(AnimatedSprite *sprite, u32 size, u32 speed, u32 numFrames, SpriteFrame *frames);
 void AssignSprite(u32 obj, AnimatedSprite *sprite);
 bool UpdateSprite(u32 obj);
+void SetSpriteFrame(u32 obj, u32 frame);
 void UpdateSprites(void);
