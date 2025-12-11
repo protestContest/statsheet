@@ -262,8 +262,52 @@ static void AbilityElementInput(View *el, u16 input)
 PageElement *NewAbilityStatElement(Rect *bounds, char *title, char *statName, char *modName)
 {
   PageElement *el = NewStatElement(bounds, title, statName, modName);
-  el->asView.onInput = AbilityElementInput;
   el->asView.draw = DrawAbilityElement;
+  el->asView.onInput = AbilityElementInput;
+  return el;
+}
+
+static void DrawModElement(View *el)
+{
+  StatElement *statEl = (StatElement*)el;
+  FontInfo info;
+  GetFontInfo(&info);
+
+  SetColor(BLACK);
+  MoveTo(el->bounds.left, el->bounds.top + info.ascent);
+  Print(statEl->title);
+
+  i32 tmp = statEl->tmp ? statEl->tmp->value : 0;
+  char str[8] = {0};
+  if (statEl->stat->value + tmp >= 0) {
+    str[0] = '+';
+    NumToString(statEl->stat->value + tmp, str+1);
+  } else {
+    NumToString(statEl->stat->value + tmp, str);
+  }
+  MoveTo(el->bounds.right - TextWidth(str), el->bounds.top + info.ascent);
+  Print(str);
+}
+
+static void ModElementInput(View *el, u16 input)
+{
+  StatElement *statEl = (StatElement*)el;
+  if (KeyPressed(BTN_SELECT)) {
+    Rect bounds = el->bounds;
+    bounds.left = bounds.right - TextWidth("00");
+    Stat *stat = statEl->tmp ? statEl->tmp : statEl->stat;
+    i32 newValue = EditNum(stat->value, &bounds, true);
+    if (UpdateStat(stat, newValue)) {
+      // todo: redraw
+    }
+  }
+}
+
+PageElement *NewModElement(Rect *bounds, char *title, char *statName, char *tmpName)
+{
+  PageElement *el = NewStatElement(bounds, title, statName, tmpName);
+  el->asView.draw = DrawModElement;
+  el->asView.onInput = ModElementInput;
   return el;
 }
 

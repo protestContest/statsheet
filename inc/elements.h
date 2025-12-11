@@ -24,6 +24,7 @@ typedef struct {
 } StatElement;
 PageElement *NewStatElement(Rect *bounds, char *title, char *statName, char *tmpName);
 PageElement *NewAbilityStatElement(Rect *bounds, char *title, char *statName, char *modName);
+PageElement *NewModElement(Rect *bounds, char *title, char *statName, char *tmpName);
 
 typedef struct {
   PageElement asElement;

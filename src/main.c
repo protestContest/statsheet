@@ -2,9 +2,10 @@
 #include "stat.h"
 #include "ui.h"
 #include "overview_page.h"
+#include "skills_page.h"
 #include "dice_page.h"
 
-Page pages[2];
+Page pages[3];
 u32 curPage = 0;
 
 int main(void)
@@ -19,7 +20,8 @@ int main(void)
   InitStats();
 
   InitOverviewPage(&pages[0]);
-  InitDicePage(&pages[1]);
+  InitSkillsPage(&pages[1]);
+  InitDicePage(&pages[2]);
 
   HideAllObjs();
   pages[curPage].asView.activate(&pages[curPage].asView, true);
