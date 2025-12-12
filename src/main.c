@@ -1,12 +1,12 @@
 #include "kit.h"
+#include "menu.h"
 #include "stat.h"
 #include "ui.h"
 #include "overview_page.h"
 #include "skills_page.h"
 #include "dice_page.h"
 
-Page pages[3];
-u32 curPage = 0;
+Menu startMenu;
 
 int main(void)
 {
@@ -19,26 +19,31 @@ int main(void)
 
   InitStats();
 
-  InitOverviewPage(&pages[0]);
-  InitSkillsPage(&pages[1]);
-  InitDicePage(&pages[2]);
+  InitMenu(&startMenu);
+  AddMenuItem(&startMenu, "Short Rest", 0, 0);
+  AddMenuItem(&startMenu, "Long Rest", 0, 0);
 
-  HideAllObjs();
-  pages[curPage].asView.activate(&pages[curPage].asView, true);
+  Page *overview = NewOverviewPage();
+  Page *skills = NewSkillsPage();
+  InitDicePage();
+
+  LinkPage(overview, skills);
+  LinkPage(skills, &dicePage);
+  LinkPage(&dicePage, overview);
+
+  SelectPage(overview);
 
   while (true) {
     VSync();
     u16 input = GetInput();
-    if (KeyPressed(BTN_L)) {
-      pages[curPage].asView.activate(&pages[curPage].asView, false);
-      curPage = (curPage == 0) ? ArrayCount(pages)-1 : curPage-1;
-      pages[curPage].asView.activate(&pages[curPage].asView, true);
+    if (KeyPressed(BTN_START)) {
+      ShowMenu(&startMenu);
+    } else if (KeyPressed(BTN_L)) {
+      PrevPage();
     } else if (KeyPressed(BTN_R)) {
-      pages[curPage].asView.activate(&pages[curPage].asView, false);
-      curPage = (curPage + 1) % ArrayCount(pages);
-      pages[curPage].asView.activate(&pages[curPage].asView, true);
+      NextPage();
     } else {
-      pages[curPage].asView.onInput(&pages[curPage].asView, input);
+      HandleInput(input);
     }
   }
 }

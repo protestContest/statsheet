@@ -11,12 +11,14 @@ static void OverviewPageActivate(View *view, bool active)
   }
 }
 
-void InitOverviewPage(Page *page)
+Page *NewOverviewPage(void)
 {
   Rect bounds;
   FontInfo info;
   GetFontInfo(&info);
   u32 lineHeight = info.ascent + info.descent;
+
+  Page *page = Alloc(sizeof(Page));
 
   InitPage(page, "Overview");
   page->asView.activate = OverviewPageActivate;
@@ -75,30 +77,37 @@ void InitOverviewPage(Page *page)
   PageElement *slotsLabel = NewLabel(&bounds, "Spell Slots");
   AddPageElement(page, slotsLabel);
 
-  SetRect(&bounds, SCREEN_W/2+10, 15 + lineHeight + 5, SCREEN_W-4, 15+2*lineHeight + 5);
+  SetRect(&bounds, SCREEN_W/2+8, 15 + lineHeight + 5, SCREEN_W-8, 15+2*lineHeight + 5);
   PageElement *l1slots = NewChargeElement(&bounds, "L1", "L1SlotsUsed", "L1Slots");
   AddPageElement(page, l1slots);
   LinkElementBeside(acElement, l1slots);
   hpElement->right = l1slots;
 
-  OffsetRect(&bounds, 0, lineHeight);
+  OffsetRect(&bounds, 0, lineHeight+1);
   PageElement *l2slots = NewChargeElement(&bounds, "L2", "L2SlotsUsed", "L2Slots");
   AddPageElement(page, l2slots);
   LinkElementBelow(l1slots, l2slots);
   LinkElementBeside(speedEl, l2slots);
 
-  OffsetRect(&bounds, 0, lineHeight);
+  OffsetRect(&bounds, 0, lineHeight+1);
   PageElement *l3slots = NewChargeElement(&bounds, "L3", "L3SlotsUsed", "L3Slots");
   AddPageElement(page, l3slots);
   LinkElementBelow(l2slots, l3slots);
   LinkElementBeside(spellSaveEl, l3slots);
 
+  OffsetRect(&bounds, 0, lineHeight+15);
+  PageElement *inspa = NewChargeElement(&bounds, "Inspiration", "InspirationUsed", "InspirationMax");
+  AddPageElement(page, inspa);
+  LinkElementBelow(l3slots, inspa);
+  LinkElementBeside(dexEl, inspa);
+
   strEl->right = l3slots;
-  dexEl->right = l3slots;
-  conEl->right = l3slots;
-  intEl->right = l3slots;
-  wisEl->right = l3slots;
-  chaEl->right = l3slots;
+  conEl->right = inspa;
+  intEl->right = inspa;
+  wisEl->right = inspa;
+  chaEl->right = inspa;
 
   SelectElement(page, hpElement);
+
+  return page;
 }

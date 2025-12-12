@@ -51,8 +51,11 @@ Performance = ModCHA
 Persuasion = ModCHA
 
 L1Slots = 4
-L1SlotsUsed: 4
+L1SlotsUsed: 0
 L2Slots = 3
 L2SlotsUsed: 0
-L3Slots = 4
+L3Slots = 3
 L3SlotsUsed: 0
+
+InspirationUsed: 0
+InspirationMax = 1

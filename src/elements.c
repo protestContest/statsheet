@@ -1,4 +1,9 @@
 #include "elements.h"
+#include "dice_page.h"
+#include "kit/canvas.h"
+#include "kit/input.h"
+#include "menu.h"
+#include "page.h"
 #include "ui.h"
 
 static void DrawLabel(View *el)
@@ -120,12 +125,12 @@ static void DrawHPElement(View *el)
 
   SetColor(BLACK);
   MoveTo(el->bounds.left, el->bounds.top + info.ascent);
-  Print(hpEl->title);
+  Print(hpEl->asStatElement.title);
 
   char str[16] = {0};
-  char *s = NumToString(hpEl->stat->value, str);
+  char *s = NumToString(hpEl->asStatElement.stat->value, str);
   s[0] = '/';
-  NumToString(hpEl->max->value + hpEl->tmp->value, s+1);
+  NumToString(hpEl->max->value + hpEl->asStatElement.tmp->value, s+1);
   MoveTo(el->bounds.right - TextWidth(str), el->bounds.top + info.ascent);
   Print(str);
 }
@@ -137,19 +142,21 @@ static void HPElementInput(View *el, u16 input)
     Rect bounds = el->bounds;
     bounds.left  = bounds.right - TextWidth("00/00");
     bounds.right = bounds.left + TextWidth("00");
-    i32 newValue = EditNum(statEl->stat->value, &bounds, false);
-    if (UpdateStat(statEl->stat, newValue)) {
-      // todo: redraw page
+    i32 newValue = EditNum(statEl->asStatElement.stat->value, &bounds, false, true);
+    if (UpdateStat(statEl->asStatElement.stat, newValue)) {
+      ClearScreen(BG);
+      RedrawPage();
       return;
     }
 
     if (KeyPressed(BTN_SELECT)) {
       bounds = el->bounds;
       bounds.left = bounds.right - TextWidth("00");
-      newValue = EditNum(statEl->tmp->value, &bounds, true);
+      newValue = EditNum(statEl->asStatElement.tmp->value, &bounds, true, true);
       FillRect(&bounds, BG);
-      if (UpdateStat(statEl->tmp, newValue)) {
-        // todo: redraw apge
+      if (UpdateStat(statEl->asStatElement.tmp, newValue)) {
+        ClearScreen(BG);
+        RedrawPage();
         return;
       }
     }
@@ -160,14 +167,11 @@ static void HPElementInput(View *el, u16 input)
 PageElement *NewHPElement(Rect *bounds, char *title)
 {
   MaxStatElement *hpEl = Alloc(sizeof(MaxStatElement));
-  InitPageElement(&hpEl->asElement, bounds, DrawHPElement, HPElementInput);
-  hpEl->title = title;
-  hpEl->stat = GetStat("HP");
-  Assert(hpEl->stat);
+  InitStatElement(&hpEl->asStatElement, bounds, title, "HP", "TmpMaxHP");
+  hpEl->asView.draw = DrawHPElement;
+  hpEl->asView.onInput = HPElementInput;
   hpEl->max = GetStat("MaxHP");
   Assert(hpEl->max);
-  hpEl->tmp = GetStat("TmpMaxHP");
-  Assert(hpEl->tmp);
   return (PageElement*)hpEl;
 }
 
@@ -192,21 +196,40 @@ static void StatElementInput(View *el, u16 input)
 {
   StatElement *statEl = (StatElement*)el;
   if (KeyPressed(BTN_SELECT)) {
-    Rect bounds = el->bounds;
-    bounds.left = bounds.right - TextWidth("00");
-    Stat *stat = statEl->tmp ? statEl->tmp : statEl->stat;
-    i32 newValue = EditNum(stat->value, &bounds, statEl->tmp ? true : false);
-    if (UpdateStat(stat, newValue)) {
-      // todo: redraw
+    if (statEl->edit(statEl)) {
+      ClearScreen(BG);
+      RedrawPage();
     }
+  } else if (KeyPressed(BTN_A) && statEl->action) {
+    statEl->action(statEl);
   }
 }
 
-PageElement *NewStatElement(Rect *bounds, char *title, char *statName, char *tmpName)
+static bool StatElementEdit(StatElement *el)
 {
-  StatElement *el = Alloc(sizeof(StatElement));
+  Rect bounds = el->asView.bounds;
+  bounds.left = bounds.right - TextWidth("00");
+  Stat *stat = el->tmp ? el->tmp : el->stat;
+  i32 newValue = EditNum(stat->value, &bounds, el->tmp ? true : false, true);
+  return UpdateStat(stat, newValue);
+}
+
+static void StatCheck(StatElement *el)
+{
+  DiceCheck(d20, 0);
+}
+
+static void ModCheck(StatElement *el)
+{
+  DiceCheck(d20, el->stat->value);
+}
+
+void InitStatElement(StatElement *el, Rect *bounds, char *title, char *statName, char *tmpName)
+{
   InitPageElement(&el->asElement, bounds, DrawStatElement, StatElementInput);
   el->title = title;
+  el->edit = StatElementEdit;
+  el->action = 0;
   el->stat = GetStat(statName);
   Assert(el->stat);
   if (tmpName) {
@@ -215,6 +238,12 @@ PageElement *NewStatElement(Rect *bounds, char *title, char *statName, char *tmp
   } else {
     el->tmp = 0;
   }
+}
+
+PageElement *NewStatElement(Rect *bounds, char *title, char *statName, char *tmpName)
+{
+  StatElement *el = Alloc(sizeof(StatElement));
+  InitStatElement(el, bounds, title, statName, tmpName);
   return (PageElement*)el;
 }
 
@@ -244,27 +273,22 @@ static void DrawAbilityElement(View *el)
   Print(str);
 }
 
-static void AbilityElementInput(View *el, u16 input)
+static bool AbilityElementEdit(StatElement *el)
 {
-  StatElement *statEl = (StatElement*)el;
-  if (KeyPressed(BTN_SELECT)) {
-    Rect bounds = el->bounds;
-    bounds.left = bounds.right - 2*TextWidth("00") - 8;
-    bounds.right = bounds.left + TextWidth("00");
-    i32 newValue = EditNum(statEl->stat->value, &bounds, false);
-
-    if (UpdateStat(statEl->stat, newValue)) {
-      // todo: redraw page
-    }
-  }
+  Rect bounds = el->asView.bounds;
+  bounds.left = bounds.right - 2*TextWidth("00") - 8;
+  bounds.right = bounds.left + TextWidth("00");
+  i32 newValue = EditNum(el->stat->value, &bounds, false, true);
+  return UpdateStat(el->stat, newValue);
 }
 
 PageElement *NewAbilityStatElement(Rect *bounds, char *title, char *statName, char *modName)
 {
-  PageElement *el = NewStatElement(bounds, title, statName, modName);
+  StatElement *el = (StatElement*)NewStatElement(bounds, title, statName, modName);
   el->asView.draw = DrawAbilityElement;
-  el->asView.onInput = AbilityElementInput;
-  return el;
+  el->edit = AbilityElementEdit;
+  el->action = StatCheck;
+  return (PageElement*)el;
 }
 
 static void DrawModElement(View *el)
@@ -289,79 +313,71 @@ static void DrawModElement(View *el)
   Print(str);
 }
 
-static void ModElementInput(View *el, u16 input)
+static bool ModElementEdit(StatElement *el)
 {
-  StatElement *statEl = (StatElement*)el;
-  if (KeyPressed(BTN_SELECT)) {
-    Rect bounds = el->bounds;
-    bounds.left = bounds.right - TextWidth("00");
-    Stat *stat = statEl->tmp ? statEl->tmp : statEl->stat;
-    i32 newValue = EditNum(stat->value, &bounds, true);
-    if (UpdateStat(stat, newValue)) {
-      // todo: redraw
-    }
-  }
+  Rect bounds = el->asView.bounds;
+  bounds.left = bounds.right - TextWidth("00");
+  Stat *stat = el->tmp ? el->tmp : el->stat;
+  i32 newValue = EditNum(stat->value, &bounds, true, true);
+  return UpdateStat(stat, newValue);
 }
 
 PageElement *NewModElement(Rect *bounds, char *title, char *statName, char *tmpName)
 {
-  PageElement *el = NewStatElement(bounds, title, statName, tmpName);
+  StatElement *el = (StatElement*)NewStatElement(bounds, title, statName, tmpName);
   el->asView.draw = DrawModElement;
-  el->asView.onInput = ModElementInput;
-  return el;
+  el->edit = ModElementEdit;
+  el->action = ModCheck;
+  return (PageElement*)el;
 }
 
 static void DrawChargeElement(View *el)
 {
-  ChargeElement *chEl = (ChargeElement*)el;
+  MaxStatElement *chEl = (MaxStatElement*)el;
   FontInfo info;
   GetFontInfo(&info);
 
   SetColor(BLACK);
   MoveTo(el->bounds.left, el->bounds.top + info.ascent);
-  Print(chEl->title);
+  Print(chEl->asStatElement.title);
 
   Rect bounds = el->bounds;
   i32 max = chEl->max->value;
   bounds.left = bounds.right - 9*max - 1;
   bounds.bottom = bounds.top + info.ascent + info.descent;
   bounds.top = bounds.bottom - 10;
-  DrawCharges(chEl->stat->value, max, &bounds);
+  DrawCharges(chEl->asStatElement.stat->value, max, &bounds);
 }
 
-static void ChargeElementInput(View *el, u16 input)
+static bool ChargeElementEdit(StatElement *el)
 {
   FontInfo info;
   GetFontInfo(&info);
-  ChargeElement *chEl = (ChargeElement*)el;
-  if (KeyPressed(BTN_SELECT)) {
-    Rect bounds = el->bounds;
-    i32 max = chEl->max->value;
-    bounds.left = bounds.right - 9*max - 1;
-    bounds.bottom = bounds.top + info.ascent + info.descent;
-    bounds.top = bounds.bottom - 10;
-    i32 newValue = EditCharges(chEl->stat->value, max, &bounds);
-    if (UpdateStat(chEl->stat, newValue)) {
-      // todo: redraw page
-    }
-  }
+  MaxStatElement *chEl = (MaxStatElement*)el;
+  Rect bounds = el->asView.bounds;
+  i32 max = chEl->max->value;
+  bounds.left = bounds.right - 9*max - 1;
+  bounds.bottom = bounds.top + info.ascent + info.descent;
+  bounds.top = bounds.bottom - 10;
+  i32 newValue = EditCharges(chEl->asStatElement.stat->value, max, &bounds);
+  return UpdateStat(chEl->asStatElement.stat, newValue);
 }
 
 PageElement *NewChargeElement(Rect *bounds, char *title, char *statName, char *maxStatName)
 {
-  ChargeElement *el = Alloc(sizeof(ChargeElement));
-  InitPageElement(&el->asElement, bounds, DrawChargeElement, ChargeElementInput);
-  el->title = title;
-  el->stat = GetStat(statName);
-  Assert(el->stat);
-  el->max = GetStat(maxStatName);
-  Assert(el->max);
-  return (PageElement*)el;
+  MaxStatElement *hpEl = Alloc(sizeof(MaxStatElement));
+  InitStatElement(&hpEl->asStatElement, bounds, title, statName, 0);
+  hpEl->asView.draw = DrawChargeElement;
+  hpEl->asStatElement.edit = ChargeElementEdit;
+  hpEl->asStatElement.action = 0;
+  hpEl->max = GetStat(maxStatName);
+  Assert(hpEl->max);
+  return (PageElement*)hpEl;
 }
 
-#define diceObj   3
+#define diceObj   5
 #define numDice   6
-static u32 diceSides[] = {     4,      6,      8,      10,      12,      20};
+static u32 diceSides[] = {4,6,8,10,12,20};
 static char *diceImgs[] = {
   "d4.tga",
   "d6.tga",
@@ -386,46 +402,183 @@ static void LoadDice(u32 index, AnimatedSprite *sprite)
   OffsetRect(&r, 64, 0);
   LoadTiles(tiles, &r, sprite->frames[3].baseTile);
   AssignSprite(diceObj, sprite);
-  PlaceObj(diceObj, SCREEN_W/2-48/2, SCREEN_H/2-48/2);
 }
 
 static void DrawDiceElement(View *el)
 {
+  PlaceObj(diceObj, el->bounds.left, el->bounds.top);
   ShowObj(diceObj);
-  ShowArrows(&el->bounds);
 }
 
 static void DiceElementInput(View *el, u16 input)
 {
   DiceElement *diceEl = (DiceElement*)el;
 
-  if (KeyPressed(BTN_LEFT)) {
-    diceEl->curDie = (diceEl->curDie > 0) ? diceEl->curDie-1 : numDice-1;
-  } else if (KeyPressed(BTN_RIGHT)) {
-    diceEl->curDie = (diceEl->curDie + 1) % numDice;
-  }
-  if (input & (BTN_LEFT | BTN_RIGHT)) {
-    LoadDice(diceEl->curDie, diceEl->sprite);
+  if (diceEl->selectDir) {
+    if (KeyPressed(BTN_LEFT)) {
+      diceEl->curDie = (diceEl->curDie > 0) ? diceEl->curDie-1 : numDice-1;
+    } else if (KeyPressed(BTN_RIGHT)) {
+      diceEl->curDie = (diceEl->curDie + 1) % numDice;
+    }
+    if (input & (BTN_LEFT | BTN_RIGHT)) {
+      LoadDice(diceEl->curDie, diceEl->sprite);
+    }
+  } else {
+    if (KeyPressed(BTN_UP)) {
+      diceEl->curDie = (diceEl->curDie > 0) ? diceEl->curDie-1 : numDice-1;
+    } else if (KeyPressed(BTN_DOWN)) {
+      diceEl->curDie = (diceEl->curDie + 1) % numDice;
+    }
+    if (input & (BTN_UP | BTN_DOWN)) {
+      LoadDice(diceEl->curDie, diceEl->sprite);
+    }
   }
 }
 
-PageElement *NewDiceElement(Rect *bounds, AnimatedSprite *sprite)
+static SpriteFrame diceFrames[] = {
+  {612, 0, 0},
+  {676, 0, 0},
+  {740, 0, 0},
+  {804, 0, 0}
+};
+static AnimatedSprite diceSprite;
+
+PageElement *NewDiceElement(Rect *bounds, bool selectDir)
 {
+  InitSprite(&diceSprite,    Obj64x64, 3, ArrayCount(diceFrames), diceFrames);
+
   DiceElement *el = Alloc(sizeof(DiceElement));
   InitPageElement(&el->asElement, bounds, DrawDiceElement, DiceElementInput);
   el->curDie = 5;
-  el->sprite = sprite;
-  LoadDice(el->curDie, sprite);
+  el->selectDir = selectDir;
+  el->sprite = &diceSprite;
+  HideObj(diceObj);
+  LoadDice(el->curDie, &diceSprite);
   return (PageElement*)el;
 }
 
 u32 RollDice(DiceElement *el)
 {
+  SeedRandom(TickCount());
   u32 end = TickCount() + 30;
   while (TickCount() < end) {
     UpdateSprite(diceObj);
   }
   SetSpriteFrame(diceObj, 0);
 
-  return RandomBetween(0, diceSides[el->curDie]);
+  return RandomBetween(0, diceSides[el->curDie]) + 1;
+}
+
+void DiceCheck(u32 die, i32 mod)
+{
+  FontInfo info;
+  GetFontInfo(&info);
+  u32 lineHeight = info.ascent + info.descent;
+  i16 w = 200;
+  i16 h = 100;
+  Rect wBounds = {SCREEN_W/2-w/2, SCREEN_H/2-h/2, SCREEN_W/2+w/2, SCREEN_H/2+h/2};
+  Rect diceBounds = {SCREEN_W/2-24-30, SCREEN_H/2-24, SCREEN_W/2+24-30, SCREEN_H/2+24};
+  Rect btnBounds = {
+    SCREEN_W/2+20, SCREEN_H/2 + lineHeight,
+    SCREEN_W/2+60, SCREEN_H/2 + lineHeight + 16
+  };
+
+  i16 numWidth = TextWidth("000");
+  Rect numBounds = {SCREEN_W/2-75-numWidth/2, SCREEN_H/2-lineHeight/2, SCREEN_W/2-75+numWidth/2, SCREEN_H/2+lineHeight/2};
+
+  DiceElement *dice = (DiceElement*)NewDiceElement(&diceBounds, false);
+  PageElement *btn = NewButton(&btnBounds, "Roll");
+  bool diceSelected = true;
+
+  HideAllObjs();
+
+  ShowWindow(&wBounds);
+  dice->asView.draw(&dice->asView);
+  btn->asView.draw(&btn->asView);
+  ShowArrows(&dice->asView.bounds, dice->selectDir);
+
+  SetColor(BLACK);
+  InsetRect(&numBounds, -2, -2);
+  FrameRect(&numBounds);
+  InsetRect(&numBounds, 1, 1);
+
+  i16 x = numBounds.right-1;
+  i16 y = numBounds.top+1+info.ascent;
+  DrawNum(mod, x, y, true);
+
+  while (KeyPressed(BTN_A)) {
+    VSync();
+    GetInput();
+  }
+
+  while (true) {
+    VSync();
+    u16 input = GetInput();
+
+    btn->asView.onInput(&btn->asView, input);
+
+    if (KeyPressed(BTN_LEFT) || KeyPressed(BTN_RIGHT)) {
+      diceSelected = !diceSelected;
+      if (diceSelected) {
+        ShowArrows(&dice->asView.bounds, false);
+      } else {
+        ShowArrows(&numBounds, false);
+      }
+    } else if (KeyPressed(BTN_B)) {
+      break;
+    } else if (KeyReleased(BTN_A)) {
+      Rect r = wBounds;
+      InsetRect(&r, 3, 3);
+      r.left = SCREEN_W/2;
+      r.bottom = SCREEN_H/2 + lineHeight;
+      FillRect(&r, WIN_BG);
+
+      i32 value = RollDice(dice);
+      if (value == 20) {
+        i16 w = TextWidth("NAT 20");
+        Rect r = {
+          SCREEN_W/2 + 40 - w/2 - 4,
+          SCREEN_H/2 - 20 - info.ascent - 2,
+          SCREEN_W/2 + 40 + w/2 + 4,
+          SCREEN_H/2 - 20 + info.descent + 2
+        };
+        SetColor(BLACK);
+        FrameRect(&r);
+        MoveTo(r.left + 5, r.top + info.ascent + 2);
+        Print("NAT 20");
+      } else if (value == 1) {
+        i16 w = TextWidth("NAT 1");
+        Rect r = {
+          SCREEN_W/2 + 40 - w/2 - 4,
+          SCREEN_H/2 - 20 - info.ascent - 2,
+          SCREEN_W/2 + 40 + w/2 + 4,
+          SCREEN_H/2 - 20 + info.descent + 2
+        };
+        SetColor(BLACK);
+        FrameRect(&r);
+        MoveTo(r.left + 5, r.top + info.ascent + 2);
+        Print("NAT 1");
+      }
+
+      char str[16] = {0};
+      CopyStr("Result: ^", str);
+      FormatInt(str, value+mod, 16);
+
+      MoveTo(SCREEN_W/2 + 40 - TextWidth(str)/2, SCREEN_H/2);
+      SetColor(BLACK);
+      Print(str);
+    } else if (diceSelected) {
+      dice->asView.onInput(&dice->asView, input);
+    } else {
+      mod = NumInput(mod, input, &numBounds, true, false, WIN_BG);
+    }
+
+  }
+
+  Free(dice);
+  Free(btn);
+  HideAllObjs();
+  FillRect(&wBounds, BG);
+  RedrawPage();
+  ReactivatePage();
 }

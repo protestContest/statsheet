@@ -1,8 +1,10 @@
 #include "ui.h"
+#include "kit/input.h"
 
 #define cursorObj 0
 
-#define arrowTile 512
+#define arrowTile     512
+#define arrowVertTile 513
 
 void InitUI(void)
 {
@@ -17,6 +19,17 @@ void InitUI(void)
   SetObjSize(arrowRightObj, Obj8x8);
   SetObjSprite(arrowRightObj, arrowTile);
 
+  InitObj(arrowUpObj);
+  HideObj(arrowUpObj);
+  SetObjSize(arrowUpObj, Obj8x8);
+  SetObjSprite(arrowUpObj, arrowVertTile);
+  SetObjFlipV(arrowUpObj, true);
+
+  InitObj(arrowDownObj);
+  HideObj(arrowDownObj);
+  SetObjSize(arrowDownObj, Obj8x8);
+  SetObjSprite(arrowDownObj, arrowVertTile);
+
   InitObj(cursorObj);
   HideObj(cursorObj);
   SetObjSize(cursorObj, Obj8x8);
@@ -25,100 +38,16 @@ void InitUI(void)
 
 void ShowWindow(Rect *bounds)
 {
-  i16 x = bounds->left;
-  i16 y = bounds->top;
-  i16 width = bounds->right - bounds->left;
-  i16 height = bounds->bottom - bounds->top;
-  Rect bg = {x+7, y+7, x+width-7, y+height-7};
-  FillRect(&bg, RGB(0, 96, 136));
-
-  SetColor(BLACK);
-  MoveTo(x, y+1);
-  LineTo(x+1, y);
-  MoveTo(x+width-2, y);
-  LineTo(x+width-1, y+1);
-  LineTo(x+width-1, y+height-2);
-  LineTo(x+width-2, y+height-1);
-  LineTo(x+1, y+height-1);
-  LineTo(x, y+height-2);
-
-  SetColor(RGB(80, 80, 80));
-  MoveTo(x+width-2, y+height-2);
-  LineTo(x+width-2, y+height-2);
-
-  MoveTo(x+2, y);
-  LineTo(x+width-3, y);
-  LineTo(x+width-2, y+1);
-  SetColor(RGB(160, 160, 160));
-  LineTo(x+width-2, y+height-3);
-  LineTo(x+width-3, y+height-3);
-  LineTo(x+width-3, y+height-2);
-  LineTo(x+2, y+height-2);
-  LineTo(x+1, y+height-3);
-  MoveTo(x+1, y+height-2);
-  SetColor(RGB(80,80,80));
-  LineTo(x, y+height-3);
-  LineTo(x, y+2);
-  LineTo(x+2, y);
-
-  SetColor(RGB(248,248,248));
-  MoveTo(x+2, y+1);
-  LineTo(x+width-3, y+1);
-  LineTo(x+width-3, y+height-4);
-  MoveTo(x+width-4, y+height-3);
-  LineTo(x+2, y+height-3);
-  MoveTo(x+1, y+height-4);
-  LineTo(x+1, y+2);
-
-  SetColor(RGB(160, 160, 160));
-  MoveTo(x+2,y+height-4);
-  LineTo(x+2, y+2);
-  LineTo(x+width-4, y+2);
-  SetColor(RGB(80, 80, 80));
-  MoveTo(x+width-4, y+3);
-  LineTo(x+width-4, y+height-4);
-  MoveTo(x+width-5, y+height-5);
-  LineTo(x+width-5, y+height-4);
-  LineTo(x+3, y+height-4);
-  MoveTo(x+3, y+3);
-  LineTo(x+3, y+3);
-
-  SetColor(BLACK);
-  MoveTo(x+4, y+height-5);
-  LineTo(x+3, y+height-5);
-  LineTo(x+3, y+4);
-  LineTo(x+4, y+4);
-  LineTo(x+4, y+3);
-  LineTo(x+width-5, y+3);
-  LineTo(x+width-5, y+4);
-
-  SetColor(RGB(0,72,80));
-  MoveTo(x+4, y+height-6);
-  LineTo(x+4, y+5);
-  MoveTo(x+5, y+4);
-  LineTo(x+width-6, y+4);
-  SetColor(RGB(0,80,96));
-  MoveTo(x+5, y+height-6);
-  LineTo(x+5, y+5);
-  LineTo(x+width-6, y+5);
-  SetColor(RGB(0, 88, 112));
-  MoveTo(x+6, y+height-7);
-  LineTo(x+6, y+6);
-  LineTo(x+width-7, y+6);
-
-  SetColor(RGB(8,128,184));
-  MoveTo(x+width-5, y+5);
-  LineTo(x+width-5, y+height-6);
-  MoveTo(x+width-6, y+height-5);
-  LineTo(x+5, y+height-5);
-  SetColor(RGB(8, 112, 168));
-  MoveTo(x+width-6, y+6);
-  LineTo(x+width-6, y+height-6);
-  LineTo(x+6, y+height-6);
-  SetColor(RGB(8, 104, 152));
-  MoveTo(x+width-7, y+7);
-  LineTo(x+width-7, y+height-7);
-  LineTo(x+7, y+height-7);
+  Rect r = *bounds;
+  SetColor(RGB(48,48,48));
+  FrameRect(&r);
+  InsetRect(&r, 1, 1);
+  FrameRect(&r);
+  InsetRect(&r, 1, 1);
+  SetColor(RGB(90,90,90));
+  FrameRect(&r);
+  InsetRect(&r, 1, 1);
+  FillRect(&r, WIN_BG);
 }
 
 void TextWindow(char *text, Rect *bounds)
@@ -166,16 +95,29 @@ void PlaceCursor(i16 x, i16 y)
   PlaceObj(cursorObj, x-8, y-4);
 }
 
-void ShowArrows(Rect *bounds)
+void ShowArrows(Rect *bounds, bool selectDir)
 {
-  PlaceObj(arrowLeftObj, bounds->left - 7, bounds->top + (bounds->bottom - bounds->top)/2 - 4);
-  ShowObj(arrowLeftObj);
-  PlaceObj(arrowRightObj, bounds->right - 1, bounds->top + (bounds->bottom - bounds->top)/2 - 4);
-  ShowObj(arrowRightObj);
+  if (selectDir) {
+    HideObj(arrowUpObj);
+    HideObj(arrowDownObj);
+    PlaceObj(arrowLeftObj, bounds->left - 7, bounds->top + (bounds->bottom - bounds->top)/2 - 4);
+    ShowObj(arrowLeftObj);
+    PlaceObj(arrowRightObj, bounds->right - 1, bounds->top + (bounds->bottom - bounds->top)/2 - 4);
+    ShowObj(arrowRightObj);
+  } else {
+    HideObj(arrowLeftObj);
+    HideObj(arrowRightObj);
+    PlaceObj(arrowUpObj, bounds->left + (bounds->right - bounds->left)/2 - 4, bounds->top - 6);
+    ShowObj(arrowUpObj);
+    PlaceObj(arrowDownObj, bounds->left + (bounds->right - bounds->left)/2 - 4, bounds->bottom);
+    ShowObj(arrowDownObj);
+  }
 }
 
 void HideArrows(void)
 {
+  HideObj(arrowUpObj);
+  HideObj(arrowDownObj);
   HideObj(arrowLeftObj);
   HideObj(arrowRightObj);
 }
@@ -213,7 +155,26 @@ void DrawCharges(i32 used, i32 max, Rect *bounds)
   }
 }
 
-i32 EditNum(i32 num, Rect *bounds, bool showSign)
+i32 NumInput(i32 num, u16 input, Rect *bounds, bool showSign, bool selectDir, u32 bg)
+{
+  FontInfo info;
+  GetFontInfo(&info);
+  i16 x = bounds->right-1;
+  i16 y = bounds->top+1+info.ascent;
+  if ((selectDir && KeyPressed(BTN_LEFT)) || (!selectDir && KeyPressed(BTN_DOWN))) {
+    num--;
+  } else if ((selectDir && KeyPressed(BTN_RIGHT)) || (!selectDir && KeyPressed(BTN_UP))) {
+    num++;
+  }
+  u16 changeMask = selectDir ? (BTN_LEFT|BTN_RIGHT) : (BTN_UP|BTN_DOWN);
+  if (input & changeMask) {
+    FillRect(bounds, bg);
+    DrawNum(num, x, y, showSign);
+  }
+  return num;
+}
+
+i32 EditNum(i32 num, Rect *bounds, bool showSign, bool selectDir)
 {
   i32 original = num;
   FontInfo info;
@@ -229,7 +190,7 @@ i32 EditNum(i32 num, Rect *bounds, bool showSign)
   FillRect(bounds, BG);
   DrawNum(num, x, y, showSign);
 
-  ShowArrows(bounds);
+  ShowArrows(bounds, selectDir);
 
   while (true) {
     VSync();
@@ -239,14 +200,8 @@ i32 EditNum(i32 num, Rect *bounds, bool showSign)
     } else if (KeyPressed(BTN_B) || KeyPressed(BTN_SELECT)) {
       num = original;
       break;
-    } else if (KeyPressed(BTN_LEFT)) {
-      num--;
-    } else if (KeyPressed(BTN_RIGHT)) {
-      num++;
-    }
-    if (input & (BTN_LEFT | BTN_RIGHT)) {
-      FillRect(bounds, BG);
-      DrawNum(num, x, y, showSign);
+    } else {
+      num = NumInput(num, input, bounds, showSign, selectDir, BG);
     }
   }
 
@@ -263,14 +218,12 @@ i32 EditCharges(i32 used, i32 max, Rect *bounds)
   FontInfo info;
   GetFontInfo(&info);
   SetColor(BLACK);
-  InsetRect(bounds, -2, -2);
+  InsetRect(bounds, -1, -1);
+  ShowArrows(bounds, true);
+  InsetRect(bounds, -1, -1);
   FrameRect(bounds);
   InsetRect(bounds, 2, 2);
 
-  PlaceObj(arrowLeftObj, bounds->left - 7, bounds->top + 3);
-  ShowObj(arrowLeftObj);
-  PlaceObj(arrowRightObj, bounds->right - 1, bounds->top + 3);
-  ShowObj(arrowRightObj);
 
   while (true) {
     VSync();
@@ -291,8 +244,7 @@ i32 EditCharges(i32 used, i32 max, Rect *bounds)
     }
   }
 
-  HideObj(arrowLeftObj);
-  HideObj(arrowRightObj);
+  HideArrows();
 
   InsetRect(bounds, -2, -2);
   FillRect(bounds, BG);

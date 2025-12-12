@@ -15,11 +15,29 @@ void AddPageElement(Page *page, PageElement *element)
   VecPush(&page->elements, &element);
 }
 
+PageElement *GetPageElement(Page *page, u32 index)
+{
+  PageElement **el = VecAt(&page->elements, index);
+  return *el;
+}
+
 void SelectElement(Page *page, PageElement *element)
 {
   page->selected = element;
   PlaceCursor(element->asView.bounds.left, element->asView.bounds.top + 7);
   ShowCursor();
+}
+
+void LinkPage(Page *left, Page *right)
+{
+  if (left->next && left->next->prev == left) {
+    left->next->prev = 0;
+  }
+  if (right->prev && right->prev->next == right) {
+    right->prev->next = 0;
+  }
+  left->next = right;
+  right->prev = left;
 }
 
 void DrawPage(View *view)
@@ -74,4 +92,44 @@ void ActivatePage(View *view, bool active)
       page->selected->asView.activate(&page->selected->asView, active);
     }
   }
+}
+
+static Page *curPage = 0;
+
+void SelectPage(Page *page)
+{
+  if (curPage) {
+    curPage->asView.activate(&curPage->asView, false);
+  }
+  curPage = page;
+  curPage->asView.activate(&curPage->asView, true);
+  RedrawPage();
+}
+
+void NextPage(void)
+{
+  if (!curPage->next) return;
+  SelectPage(curPage->next);
+}
+
+void PrevPage(void)
+{
+  if (!curPage->prev) return;
+  SelectPage(curPage->prev);
+}
+
+void RedrawPage(void)
+{
+  Assert(curPage);
+  curPage->asView.draw(&curPage->asView);
+}
+
+void ReactivatePage(void)
+{
+  curPage->asView.activate(&curPage->asView, true);
+}
+
+void HandleInput(u16 input)
+{
+  curPage->asView.onInput(&curPage->asView, input);
 }

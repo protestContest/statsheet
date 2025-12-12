@@ -1,4 +1,4 @@
 #pragma once
 #include "page.h"
 
-void InitSkillsPage(Page *page);
+Page *NewSkillsPage(void);

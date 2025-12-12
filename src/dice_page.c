@@ -4,13 +4,19 @@
 #include "kit/sprite.h"
 #include "ui.h"
 
-static SpriteFrame diceFrames[] = {
-  {612, 0, 0},
-  {676, 0, 0},
-  {740, 0, 0},
-  {804, 0, 0}
-};
-static AnimatedSprite diceSprite;
+Page dicePage;
+
+static void DicePageActivate(View *view, bool active)
+{
+  Page *page = (Page*)view;
+  ActivatePage(view, active);
+  if (active) {
+    DiceElement *dice = (DiceElement*)GetPageElement(page, 0);
+    ShowArrows(&dice->asView.bounds, dice->selectDir);
+  } else {
+    HideArrows();
+  }
+}
 
 static void DicePageInput(View *view, u16 input)
 {
@@ -34,20 +40,20 @@ static void DicePageInput(View *view, u16 input)
     FontInfo info;
     GetFontInfo(&info);
     MoveTo(SCREEN_W/2 - TextWidth(numStr)/2, top+wHeight/2 - (info.ascent+info.descent)/2 + info.ascent);
-    SetColor(WHITE);
+    SetColor(BLACK);
     Print(numStr);
   }
 }
 
-void InitDicePage(Page *page)
+void InitDicePage(void)
 {
+  Page *page = &dicePage;
   InitPage(page, "Dice");
+  page->asView.activate = DicePageActivate;
   page->asView.onInput = DicePageInput;
 
-  InitSprite(&diceSprite,    Obj64x64, 2, ArrayCount(diceFrames), diceFrames);
-
-  Rect bounds = {SCREEN_W/2-32, SCREEN_H/2-32, SCREEN_W/2+32, SCREEN_H/2+32};
-  PageElement *diceEl = NewDiceElement(&bounds, &diceSprite);
+  Rect bounds = {SCREEN_W/2-24, SCREEN_H/2-24, SCREEN_W/2+24, SCREEN_H/2+24};
+  PageElement *diceEl = NewDiceElement(&bounds, true);
   AddPageElement(page, diceEl);
   SelectElement(page, diceEl);
 

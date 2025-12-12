@@ -1,5 +1,5 @@
 #include "kit/canvas.h"
-#include "overview_page.h"
+#include "skills_page.h"
 #include "elements.h"
 #include "page.h"
 #include "page_element.h"
@@ -13,14 +13,15 @@ static void SkillsPageActivate(View *view, bool active)
   }
 }
 
-void InitSkillsPage(Page *page)
+Page *NewSkillsPage(void)
 {
   Rect bounds;
   FontInfo info;
   GetFontInfo(&info);
   u32 lineHeight = info.ascent + info.descent;
 
-  InitPage(page, "Overview");
+  Page *page = Alloc(sizeof(Page));
+  InitPage(page, "Skills");
   page->asView.activate = SkillsPageActivate;
 
   SetRect(&bounds, 8, 15, SCREEN_W/2-4, 15 + lineHeight);
@@ -116,4 +117,6 @@ void InitSkillsPage(Page *page)
   LinkElementBeside(investigationEl, survivalEl);
 
   SelectElement(page, acrobaticsEl);
+
+  return page;
 }
