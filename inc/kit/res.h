@@ -72,7 +72,8 @@ typedef struct {
 } ResFile;
 
 void *GetResource(char *name);
-#define ResData(res)  ((void*)(((u8*)(res))+sizeof(u32)))
+#define ResLength(res)  (*((u32*)(res)) >> 8)
+#define ResData(res)    ((void*)(((u8*)(res))+sizeof(u32)))
 void *Uncompress(void *src, void *dst);
 
 

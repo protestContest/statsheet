@@ -1,8 +1,9 @@
 #include "kit/canvas.h"
 #include "skills_page.h"
 #include "elements.h"
-#include "page.h"
 #include "page_element.h"
+
+static Page skillsPage;
 
 static void SkillsPageActivate(View *view, bool active)
 {
@@ -13,14 +14,14 @@ static void SkillsPageActivate(View *view, bool active)
   }
 }
 
-Page *NewSkillsPage(void)
+Page *InitSkillsPage(void)
 {
   Rect bounds;
   FontInfo info;
   GetFontInfo(&info);
   u32 lineHeight = info.ascent + info.descent;
 
-  Page *page = Alloc(sizeof(Page));
+  Page *page = &skillsPage;
   InitPage(page, "Skills");
   page->asView.activate = SkillsPageActivate;
 

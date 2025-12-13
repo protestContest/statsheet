@@ -30,7 +30,8 @@ void Log(char *msg)
 
 void Error(char *msg)
 {
-  ClearScreen(GRAY);
+  SetBackground(GRAY);
+  ClearScreen();
   HideLayer(DISP_OBJ);
 
   TGA *stop = Uncompress(GetResource("stop.tga"), 0);

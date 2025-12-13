@@ -1,5 +1,4 @@
 #pragma once
-#include "kit/sprite.h"
 #include "page_element.h"
 #include "stat.h"
 
@@ -57,10 +56,6 @@ typedef struct {
     View asView;
     PageElement asElement;
   };
-  u32 curDie;
-  bool selectDir;
-  AnimatedSprite *sprite;
-} DiceElement;
-PageElement *NewDiceElement(Rect *bounds, bool selectDir);
-u32 RollDice(DiceElement *el);
-void DiceCheck(u32 die, i32 mod);
+  char *text;
+} TextElement;
+PageElement *NewTextElement(Rect *bounds, char *text);

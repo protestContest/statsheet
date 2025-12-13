@@ -31,6 +31,15 @@ void VecPush(Vec *vec, void *item)
   Copy(item, VecAt(vec, index), vec->itemSize);
 }
 
+void VecPop(Vec *vec, void *dst)
+{
+  if (vec->count == 0) return;
+  if (dst) {
+    VecGet(vec, vec->count-1, dst);
+  }
+  vec->count--;
+}
+
 void VecGet(Vec *vec, u32 index, void *dst)
 {
   if (index >= vec->count) return;

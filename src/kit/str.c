@@ -1,6 +1,5 @@
 #include "kit/str.h"
 #include "kit/mem.h"
-#include "kit/debug.h"
 
 void ClearStr(char *str)
 {
@@ -108,4 +107,23 @@ char *StrCat(char *a, char *b)
   u32 blen = StrLen(b);
   Copy(b, a+alen, blen);
   return a + alen + blen;
+}
+
+u32 ParseInt(char **s)
+{
+  u32 n = 0;
+  while (IsDigit(**s)) {
+    n = n*10 + **s - '0';
+    (*s)++;
+  }
+  return n;
+}
+
+bool StrEq(char *s1, char *s2)
+{
+  while (*s1 && *s2 && *s1 == *s2) {
+    s1++;
+    s2++;
+  }
+  return *s1 == *s2;
 }

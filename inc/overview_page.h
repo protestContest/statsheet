@@ -1,4 +1,4 @@
 #pragma once
 #include "page.h"
 
-Page *NewOverviewPage(void);
+Page *InitOverviewPage(void);

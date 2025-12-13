@@ -4,6 +4,7 @@
 #include "ui.h"
 #include "overview_page.h"
 #include "skills_page.h"
+#include "spells_page.h"
 #include "dice_page.h"
 
 Menu startMenu;
@@ -23,13 +24,15 @@ int main(void)
   AddMenuItem(&startMenu, "Short Rest", 0, 0);
   AddMenuItem(&startMenu, "Long Rest", 0, 0);
 
-  Page *overview = NewOverviewPage();
-  Page *skills = NewSkillsPage();
-  InitDicePage();
+  Page *overview = InitOverviewPage();
+  Page *skills = InitSkillsPage();
+  Page *spells = InitSpellsPage();
+  Page *dice = InitDicePage();
 
   LinkPage(overview, skills);
-  LinkPage(skills, &dicePage);
-  LinkPage(&dicePage, overview);
+  LinkPage(skills, spells);
+  LinkPage(spells, dice);
+  LinkPage(dice, overview);
 
   SelectPage(overview);
 

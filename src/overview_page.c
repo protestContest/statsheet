@@ -1,6 +1,7 @@
 #include "overview_page.h"
 #include "elements.h"
-#include "page.h"
+
+Page overviewPage;
 
 static void OverviewPageActivate(View *view, bool active)
 {
@@ -11,14 +12,14 @@ static void OverviewPageActivate(View *view, bool active)
   }
 }
 
-Page *NewOverviewPage(void)
+Page *InitOverviewPage(void)
 {
   Rect bounds;
   FontInfo info;
   GetFontInfo(&info);
   u32 lineHeight = info.ascent + info.descent;
 
-  Page *page = Alloc(sizeof(Page));
+  Page *page = &overviewPage;
 
   InitPage(page, "Overview");
   page->asView.activate = OverviewPageActivate;

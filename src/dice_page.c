@@ -1,10 +1,9 @@
 #include "dice_page.h"
 #include "elements.h"
-#include "kit/input.h"
-#include "kit/sprite.h"
+#include "dice.h"
 #include "ui.h"
 
-Page dicePage;
+static Page dicePage;
 
 static void DicePageActivate(View *view, bool active)
 {
@@ -45,7 +44,7 @@ static void DicePageInput(View *view, u16 input)
   }
 }
 
-void InitDicePage(void)
+Page *InitDicePage(void)
 {
   Page *page = &dicePage;
   InitPage(page, "Dice");
@@ -60,4 +59,5 @@ void InitDicePage(void)
   SetRect(&bounds, SCREEN_W/2-20, SCREEN_H - SCREEN_H/4, SCREEN_W/2+20, SCREEN_H - SCREEN_H/4+16);
   PageElement *btn = NewButton(&bounds, "Roll");
   AddPageElement(page, btn);
+  return page;
 }

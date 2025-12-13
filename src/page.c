@@ -81,7 +81,7 @@ void ActivatePage(View *view, bool active)
   Page *page = (Page*)view;
 
   if (active) {
-    ClearScreen(BG);
+    ClearScreen();
     DrawPage(view);
   } else {
     HideAllObjs();

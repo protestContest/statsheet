@@ -12,5 +12,6 @@ typedef struct {
 void InitVec(Vec *vec, u32 itemSize, u32 capacity);
 void ResizeVec(Vec *vec, u32 capacity);
 void VecPush(Vec *vec, void *item);
+void VecPop(Vec *vec, void *dst);
 void VecGet(Vec *vec, u32 index, void *dst);
 void *VecAt(Vec *vec, u32 index);

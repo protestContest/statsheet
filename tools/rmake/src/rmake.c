@@ -8,6 +8,7 @@
 #include "lzss.h"
 #include "runlength.h"
 #include "pack_stats.h"
+#include "pack_strings.h"
 
 /*
 Reads a manifest file and packs resources into a resource file. The manifest file is a list of
@@ -32,7 +33,8 @@ static PackMethod methods[] = {
   {"Z", PackLZSS},
   {"H", PackHuffman},
   {"R", PackRunLength},
-  {"PackStats", PackStats}
+  {"PackStats", PackStats},
+  {"PackStrings", PackStrings}
 };
 
 void Filter(u8 *data, u32 size, u32 dataSize)
@@ -119,7 +121,6 @@ int main(int argc, char *argv[])
   for (u32 i = 0; i < manifest->count; i++) {
     u32 zero = 0;
     u32 padSize = Align(manifest->items[i].size, 4) - manifest->items[i].size;
-
     fwrite(manifest->items[i].data, manifest->items[i].size, 1, stdout);
     fwrite(&zero, padSize, 1, stdout);
   }

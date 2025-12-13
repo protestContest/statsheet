@@ -32,8 +32,6 @@ typedef struct __attribute__((packed)) {
   u16 data[];
 } TGA;
 
-extern Rect screenRect;
-
 #define SCREEN_W 240
 #define SCREEN_H 160
 
@@ -48,12 +46,13 @@ extern Rect screenRect;
 #define GREEN   RGB(0, 255, 0)
 #define BLUE    RGB(0, 0, 255)
 
-void ClearScreen(u16 color);
+void ClearScreen(void);
 
 Point GetPen(void);
 void GetPenState(PenState *pen);
 void PenSize(u16 h, u16 v);
 void SetColor(u16 color);
+void SetBackground(u16 color);
 void MoveTo(i16 x, i16 y);
 void Move(i16 dx, i16 dy);
 void LineTo(i16 x, i16 y);
@@ -61,6 +60,7 @@ void Line(i16 dx, i16 dy);
 void SetRect(Rect *rect, i16 left, i16 top, i16 right, i16 bottom);
 void FillRect(Rect *rect, u16 color);
 void FrameRect(Rect *rect);
+void EraseRect(Rect *rect);
 
 void SectRect(Rect *rect, Rect *obj);
 void OffsetRect(Rect *rect, i16 x, i16 y);

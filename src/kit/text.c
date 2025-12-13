@@ -25,6 +25,84 @@ typedef struct {
 
 static FontRec *currentFont = 0;
 
+static i16 DoChar(char c, FontRec *rec, bool draw)
+{
+  i16 *bit_image;
+  i16 *loc_table;
+  i16 *ow_table;
+  i16 table_size;
+  i16 ow;
+  i16 font_type = rec->type & 0xFFFC;
+  PenState pen;
+  GetPenState(&pen);
+  i16 x = pen.pos.h;
+  i16 y = pen.pos.v;
+
+  table_size = rec->last_char - rec->first_char + 2;
+  bit_image = (i16*)(rec + 1);
+  loc_table = bit_image + rec->row_words*rec->rect_height;
+  ow_table = &rec->owt_offset + rec->owt_offset;
+
+
+  u8 offset, width;
+  i16 loc, img_width, index, first_word, last_word, leading_bits, trailing_bits;
+
+  /* find the table index for this char; default to the missing char */
+  index = table_size - 1;
+  if (c >= rec->first_char && c <= rec->last_char) {
+    index = c - rec->first_char;
+  }
+
+  ow = ow_table[index];
+  if (ow == -1) {
+    index = table_size - 1;
+    ow = ow_table[index];
+  }
+
+  width = ow & 0xFF;
+  if (!draw) return width;
+
+  offset = ow >> 8;
+  loc = loc_table[index];
+  img_width = loc_table[index+1] - loc;
+  offset += rec->kern_max;
+
+  first_word = loc / 16;
+  last_word = (loc+img_width-1) / 16;
+  leading_bits = loc % 16;
+  trailing_bits = 15 - (loc+img_width-1) % 16;
+
+  if (rec->type != fontWid) {
+    i32 bx, by, w;
+    for (by = 0; by < rec->rect_height; by++) {
+      i16 px = x - leading_bits + offset;
+      i16 py = y - rec->ascent + by;
+      for (w = first_word; w <= last_word; w++) {
+        u16 word = bit_image[by*rec->row_words + w];
+        if (w == first_word) word &= (0xFFFF >> leading_bits);
+        if (w == last_word) word &= (0xFFFF << trailing_bits);
+        if (!word) {
+          px += 16;
+          continue;
+        }
+        for (bx = 0; bx < 16; bx++) {
+          if (word & (0x8000 >> bx)) {
+            WritePixel(px, py, pen.color);
+          }
+          px++;
+        }
+      }
+    }
+  }
+
+  if (font_type == propFont) {
+    return width;
+  } else if (font_type == fixedFont) {
+    return rec->wid_max;
+  }
+  return 0;
+}
+
 static i16 DoString(char *str, FontRec *rec, bool draw)
 {
   i16 *bit_image;
@@ -133,8 +211,15 @@ void GetFontInfo(FontInfo *info)
 
 void Print(char *str)
 {
-  if (!currentFont) return;
+  Assert(currentFont);
   i16 width = DoString(str, currentFont, true);
+  Move(width, 0);
+}
+
+void DrawChar(char c)
+{
+  Assert(currentFont);
+  i16 width = DoChar(c, currentFont, true);
   Move(width, 0);
 }
 
@@ -142,6 +227,12 @@ u32 TextWidth(char *str)
 {
   Assert(currentFont);
   return DoString(str, currentFont, false);
+}
+
+u32 CharWidth(char c)
+{
+  Assert(currentFont);
+  return DoChar(c, currentFont, false);
 }
 
 u32 TextHeight(char *str)

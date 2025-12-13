@@ -1,4 +1,5 @@
 #include "ui.h"
+#include "kit/canvas.h"
 #include "kit/input.h"
 
 #define cursorObj 0
@@ -8,6 +9,8 @@
 
 void InitUI(void)
 {
+  SetBackground(BG);
+
   InitObj(arrowLeftObj);
   HideObj(arrowLeftObj);
   SetObjSize(arrowLeftObj, Obj8x8);
@@ -47,7 +50,8 @@ void ShowWindow(Rect *bounds)
   SetColor(RGB(90,90,90));
   FrameRect(&r);
   InsetRect(&r, 1, 1);
-  FillRect(&r, WIN_BG);
+  SetBackground(WIN_BG);
+  EraseRect(&r);
 }
 
 void TextWindow(char *text, Rect *bounds)
@@ -77,7 +81,7 @@ void Alert(char *text)
 
   TextWindow(text, &bounds);
   WaitForInput();
-  FillRect(&bounds, BG);
+  EraseRect(&bounds);
 }
 
 void ShowCursor(void)
@@ -155,7 +159,7 @@ void DrawCharges(i32 used, i32 max, Rect *bounds)
   }
 }
 
-i32 NumInput(i32 num, u16 input, Rect *bounds, bool showSign, bool selectDir, u32 bg)
+i32 NumInput(i32 num, u16 input, Rect *bounds, bool showSign, bool selectDir)
 {
   FontInfo info;
   GetFontInfo(&info);
@@ -168,7 +172,7 @@ i32 NumInput(i32 num, u16 input, Rect *bounds, bool showSign, bool selectDir, u3
   }
   u16 changeMask = selectDir ? (BTN_LEFT|BTN_RIGHT) : (BTN_UP|BTN_DOWN);
   if (input & changeMask) {
-    FillRect(bounds, bg);
+    EraseRect(bounds);
     DrawNum(num, x, y, showSign);
   }
   return num;
@@ -187,7 +191,7 @@ i32 EditNum(i32 num, Rect *bounds, bool showSign, bool selectDir)
   i16 x = bounds->right-1;
   i16 y = bounds->top+1+info.ascent;
 
-  FillRect(bounds, BG);
+  EraseRect(bounds);
   DrawNum(num, x, y, showSign);
 
   ShowArrows(bounds, selectDir);
@@ -201,13 +205,13 @@ i32 EditNum(i32 num, Rect *bounds, bool showSign, bool selectDir)
       num = original;
       break;
     } else {
-      num = NumInput(num, input, bounds, showSign, selectDir, BG);
+      num = NumInput(num, input, bounds, showSign, selectDir);
     }
   }
 
   HideArrows();
   InsetRect(bounds, -1, -1);
-  FillRect(bounds, BG);
+  EraseRect(bounds);
   DrawNum(num, x, y, showSign);
   return num;
 }
@@ -239,7 +243,7 @@ i32 EditCharges(i32 used, i32 max, Rect *bounds)
       used++;
     }
     if (input & (BTN_LEFT | BTN_RIGHT)) {
-      FillRect(bounds, BG);
+      EraseRect(bounds);
       DrawCharges(used, max, bounds);
     }
   }
@@ -247,7 +251,7 @@ i32 EditCharges(i32 used, i32 max, Rect *bounds)
   HideArrows();
 
   InsetRect(bounds, -2, -2);
-  FillRect(bounds, BG);
+  EraseRect(bounds);
   InsetRect(bounds, 2, 2);
   DrawCharges(used, max, bounds);
 

@@ -4,12 +4,11 @@
 #include "kit/math.h"
 
 static PenState pen = {{0,0}, {1,1}, 0};
+static u16 bgColor = WHITE;
 
-Rect screenRect = {0, 0, SCREEN_W, SCREEN_H};
-
-void ClearScreen(u16 color)
+void ClearScreen(void)
 {
-  u16 src[2] = {color, color};
+  u16 src[2] = {bgColor, bgColor};
   BlockFill((u32*)src, (u32*)VRAM, VRAM_WORDS);
 }
 
@@ -32,6 +31,11 @@ void PenSize(u16 h, u16 v)
 void SetColor(u16 color)
 {
   pen.color = color;
+}
+
+void SetBackground(u16 color)
+{
+  bgColor = color;
 }
 
 void MoveTo(i16 x, i16 y)
@@ -112,6 +116,11 @@ void FrameRect(Rect *rect)
   LineTo(rect->right - pen.size.h, rect->bottom - pen.size.v);
   LineTo(rect->left, rect->bottom - pen.size.v);
   LineTo(rect->left, rect->top);
+}
+
+void EraseRect(Rect *rect)
+{
+  FillRect(rect, bgColor);
 }
 
 void SectRect(Rect *rect, Rect *obj)

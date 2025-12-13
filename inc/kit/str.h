@@ -1,5 +1,7 @@
 #pragma once
 
+#define IsDigit(c)  ((c) >= '0' && (c) <= '9')
+
 void ClearStr(char *str);
 u32 StrLen(char *str);
 u32 NumDigits(i32 num, i32 base);
@@ -8,3 +10,5 @@ char *HexToString(i32 num, char *str);
 char *FormatStr(char *buf, char *str, u32 strLen);
 char *FormatInt(char *buf, i32 num, u32 strLen);
 char *StrCat(char *a, char *b);
+u32 ParseInt(char **s);
+bool StrEq(char *s1, char *s2);

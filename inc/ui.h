@@ -20,7 +20,7 @@ void ShowArrows(Rect *bounds, bool selectDir);
 void HideArrows(void);
 void DrawNum(i32 num, i16 x, i16 y, bool showSign);
 void DrawCharges(i32 used, i32 max, Rect *bounds);
-i32 NumInput(i32 num, u16 input, Rect *bounds, bool showSign, bool selectDir, u32 bg);
+i32 NumInput(i32 num, u16 input, Rect *bounds, bool showSign, bool selectDir);
 i32 EditNum(i32 num, Rect *bounds, bool showSign, bool selectDir);
 i32 EditCharges(i32 used, i32 max, Rect *bounds);
 void HideAllObjs(void);
