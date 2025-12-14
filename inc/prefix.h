@@ -1,10 +1,7 @@
 #pragma once
 
 #define _DEFAULT_SOURCE
-#include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #ifndef _Bool
 #define _Bool int

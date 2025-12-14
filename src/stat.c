@@ -11,46 +11,22 @@
 static HashMap statMap = EmptyHashMap;
 static Stat *statList = 0;
 
+static void StatUpdated(Stat *stat);
+
 void AddStat(Stat *stat)
 {
   VecPush(statList, *stat);
   HashMapSet(&statMap, stat->id, VecCount(statList)-1);
 }
 
-typedef enum {
-  opHalt = 0,
-  opNoop = ' ',
-  opConst = '#',
-  opSmall = 128,
-  opVar = '$',
-  opAdd = '+',
-  opSub = '-',
-  opMul = '*',
-  opDiv = '/',
-  opRem = '%',
-  opAnd = '&',
-  opOr = '|',
-  opNot = '~',
-  opIf = '?',
-  opEq = '=',
-  opLt = '<',
-  opBlockStart = '[',
-  opBlockEnd = ']',
-  opCall = '.',
-  opDup = '"',
-  opDrop = '_',
-  opSwap = '\\',
-  opRot = '>',
-} OpCode;
-
 static u8 *MatchBracket(u8 *pc)
 {
   u32 count = 0;
   while (*pc != opHalt) {
-    if (*pc == opBlockEnd) {
+    if (*pc == opReturn) {
       if (count == 0) return pc+1;
       count--;
-    } else if (*pc == opBlockStart) {
+    } else if (*pc == opQuote) {
       count++;
     }
     pc++;
@@ -63,38 +39,42 @@ void CalcStat(Stat *stat)
 {
   if (!stat->calc) return;
 
+  u8 *start;
   u8 *callStack[256] = {0};
   u32 callTop = 0;
   i32 stack[256];
   u32 top = 0;
-
-  i32 n;
-  u32 index;
+  u32 index, hash;
   Stat *s;
+  i32 n;
+
+  Stat **modified = 0;
 
   u8 *pc = stat->calc;
   while (*pc != opHalt) {
-    if (*pc & opSmall) {
+    if (IsDigit(*pc)) {
       Assert(top < ArrayCount(stack));
-      n = (*pc) & ~opSmall;
-      stack[top++] = n;
+      n = *pc - '0';
       pc++;
+      while (IsDigit(*pc)) {
+        n = n*10 + *pc - '0';
+        pc++;
+      }
+      stack[top++] = n;
+      continue;
+    }
+    if (IsAlpha(*pc)) {
+      Assert(top < ArrayCount(stack));
+      start = pc;
+      while (IsSymChar(*pc)) pc++;
+      hash = Hash(start, pc-start);
+      Assert(HashMapFetch(&statMap, hash, &index));
+      s = &statList[index];
+      stack[top++] = s->value;
       continue;
     }
     switch (*pc++) {
-    case opConst:
-      Assert(top < ArrayCount(stack));
-      Copy(pc, &n, sizeof(u32));
-      stack[top++] = n;
-      pc += sizeof(u32);
-      break;
-    case opVar:
-      Assert(top < ArrayCount(stack));
-      Copy(pc, &n, sizeof(u32));
-      Assert(HashMapFetch(&statMap, n, &index));
-      s = &statList[index];
-      stack[top++] = s->value;
-      pc += sizeof(u32);
+    case opNoop:
       break;
     case opAdd:
       Assert(top >= 2);
@@ -152,18 +132,18 @@ void CalcStat(Stat *stat)
       stack[top-2] = (stack[top-2] < stack[top-1]) ? 1 : 0;
       top--;
       break;
-    case opBlockStart:
+    case opQuote:
       Assert(top < ArrayCount(stack));
-      stack[top++] = (u32)pc;
+      stack[top++] = (i32)pc;
       pc = MatchBracket(pc);
       break;
-    case opBlockEnd:
+    case opReturn:
       Assert(callTop > 0);
       pc = callStack[--callTop];
       break;
     case opCall:
       Assert(top >= 1);
-      if (*pc != opBlockEnd && *pc != opHalt) {
+      if (*pc != opReturn && *pc != opHalt) {
         Assert(callTop < ArrayCount(callStack));
         callStack[callTop++] = pc;
       }
@@ -192,10 +172,29 @@ void CalcStat(Stat *stat)
       stack[top-2] = stack[top-1];
       stack[top-1] = n;
       break;
+    case opStr:
+      Assert(top < ArrayCount(stack));
+      start = pc;
+      while (*pc != opStr) pc++;
+      stack[top++] = Hash(start, pc-start);
+      pc++;
+      break;
+    case opStore:
+      Assert(top >= 2);
+      Assert(HashMapFetch(&statMap, stack[--top], &index));
+      s = &statList[index];
+      s->value = stack[--top];
+      VecPush(modified, s);
+      break;
     default:
       Assert(false);
     }
   }
+
+  for (u32 i = 0; i < VecCount(modified); i++) {
+    StatUpdated(modified[i]);
+  }
+  FreeVec(modified);
 
   Assert(top == 1);
   stat->value = stack[0];
@@ -281,17 +280,19 @@ static void UpdateStatRec(StatList *queue, StatList *end)
   }
 }
 
-bool UpdateStat(Stat *stat, i32 value)
+static void StatUpdated(Stat *stat)
 {
-  if (stat->value == value) return false;
-  stat->value = value;
   if (stat->numDeps > 0) {
     StatList *queue = Alloc(sizeof(StatList));
-
     queue->stat = stat;
     queue->next = 0;
     UpdateStatRec(queue, queue);
-    return true;
   }
-  return false;
+}
+
+void UpdateStat(Stat *stat, i32 value)
+{
+  if (stat->value == value) return;
+  stat->value = value;
+  StatUpdated(stat);
 }

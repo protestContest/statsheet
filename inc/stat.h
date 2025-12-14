@@ -1,5 +1,30 @@
 #pragma once
 
+typedef enum {
+  opHalt = 0,
+  opNoop = ' ',
+  opAdd = '+',
+  opSub = '-',
+  opMul = '*',
+  opDiv = '/',
+  opRem = '%',
+  opAnd = '&',
+  opOr = '|',
+  opNot = '~',
+  opIf = '?',
+  opEq = '=',
+  opLt = '<',
+  opQuote = '[',
+  opReturn = ']',
+  opCall = '.',
+  opDup = ':',
+  opDrop = '_',
+  opSwap = '\\',
+  opRot = '>',
+  opStr = '"',
+  opStore = '!',
+} OpCode;
+
 typedef struct {
   u32 id;
   i32 value;
@@ -12,4 +37,4 @@ void InitStats(void);
 Stat *GetStat(char *name);
 Stat *GetStatByID(u32 id);
 
-bool UpdateStat(Stat *stat, i32 value);
+void UpdateStat(Stat *stat, i32 value);

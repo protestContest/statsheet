@@ -2,7 +2,12 @@
 #include "parse.h"
 #include "vec.h"
 #include "hashmap.h"
+#include "../../inc/stat.h"
 #include <string.h>
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 /*
 A stat file has this format:
@@ -16,30 +21,6 @@ For each stat:
   u32 depIDs[numDeps];
 */
 
-typedef enum {
-  opHalt = 0,
-  opConst = '#',
-  opSmall = 128,
-  opVar = '$',
-  opAdd = '+',
-  opSub = '-',
-  opMul = '*',
-  opDiv = '/',
-  opRem = '%',
-  opAnd = '&',
-  opOr = '|',
-  opNot = '~',
-  opIf = '?',
-  opEq = '=',
-  opLt = '<',
-  opBlockStart = '[',
-  opBlockEnd = ']',
-  opCall = '.',
-  opDup = '"',
-  opDrop = '_',
-  opSwap = '\\',
-  opRot = '>',
-} OpCode;
 
 struct {char name; OpCode op;} functionMap[] = {
   {'+', opAdd},
@@ -53,13 +34,15 @@ struct {char name; OpCode op;} functionMap[] = {
   {'?', opIf},
   {'=', opEq},
   {'<', opLt},
-  {'[', opBlockStart},
-  {']', opBlockEnd},
+  {'[', opQuote},
+  {']', opReturn},
   {'.', opCall},
-  {'"', opDup},
+  {':', opDup},
   {'_', opDrop},
   {'\\', opSwap},
   {'>', opRot},
+  {'"', opStr},
+  {'!', opStore},
 };
 
 typedef struct StatDep {
@@ -74,9 +57,9 @@ typedef struct {
   StatDep *deps;
   u32 numDeps;
   StatDep *reverseDeps;
-} Stat;
+} StatInfo;
 
-void FreeStats(Stat *stats)
+void FreeStats(StatInfo *stats)
 {
   for (u32 i = 0; i < VecCount(stats); i++) {
     free(stats[i].name);
@@ -97,37 +80,27 @@ char *ParseCalculation(char **cur, char *end, StatDep **deps)
 
   while (*cur < end && **cur != '\n') {
     if (IsDigit(**cur)) {
-      u32 num = 0;
       while (*cur < end && IsDigit(**cur)) {
-        num = num*10 + **cur - '0';
+        VecPush(code, **cur);
         (*cur)++;
       }
-      if (num < 128) {
-        VecPush(code, opSmall | (num & 0x7F));
-      } else {
-        VecPush(code, opConst);
-        VecPush(code, num & 0xFF);
-        VecPush(code, (num >> 8) & 0xFF);
-        VecPush(code, (num >> 16) & 0xFF);
-        VecPush(code, (num >> 24) & 0xFF);
-      }
+      VecPush(code, opNoop);
       SkipSpaces(*cur, end);
     } else if (IsAlpha(**cur)) {
       char *start = *cur;
       while (*cur < end && IsSymChar(**cur)) {
+        VecPush(code, **cur);
         (*cur)++;
       }
       StatDep *dep = malloc(sizeof(StatDep));
       dep->id = Hash(start, *cur - start);
       dep->next = *deps;
       *deps = dep;
-
-      VecPush(code, opVar);
-      VecPush(code, dep->id & 0xFF);
-      VecPush(code, (dep->id >> 8) & 0xFF);
-      VecPush(code, (dep->id >> 16) & 0xFF);
-      VecPush(code, (dep->id >> 24) & 0xFF);
+      VecPush(code, opNoop);
       SkipSpaces(*cur, end);
+    } else if (**cur == opStore) {
+      fprintf(stderr, "Store not allowed in stat definitions\n");
+      exit(99);
     } else {
       bool found = false;
       for (u32 i = 0; i < ArrayCount(functionMap); i++) {
@@ -150,10 +123,10 @@ char *ParseCalculation(char **cur, char *end, StatDep **deps)
   return code;
 }
 
-Stat *ParseStatFile(FILE *f, u32 size)
+StatInfo *ParseStatFile(FILE *f, u32 size)
 {
-  Stat *stats = 0;
-  Stat stat;
+  StatInfo *stats = 0;
+  StatInfo stat;
 
   char *data = malloc(size);
   fread(data, size, 1, f);
@@ -195,7 +168,7 @@ Stat *ParseStatFile(FILE *f, u32 size)
   return stats;
 }
 
-void ValidateStats(Stat *stats, HashMap *map)
+void ValidateStats(StatInfo *stats, HashMap *map)
 {
   for (u32 i = 0; i < VecCount(stats); i++) {
     StatDep *deps = stats[i].deps;
@@ -211,14 +184,14 @@ void ValidateStats(Stat *stats, HashMap *map)
   }
 }
 
-void CheckDeps(Stat *stat, HashMap *map, HashMap *valid, HashMap *pending, Stat *stats, Stat ***ordered)
+void CheckDeps(StatInfo *stat, HashMap *map, HashMap *valid, HashMap *pending, StatInfo *stats, StatInfo ***ordered)
 {
   if (HashMapContains(valid, stat->id)) return;
   HashMapSet(pending, stat->id, 1);
 
   StatDep *dep = stat->deps;
   while (dep) {
-    Stat *subStat = &stats[HashMapGet(map, dep->id)];
+    StatInfo *subStat = &stats[HashMapGet(map, dep->id)];
 
     if (HashMapContains(pending, dep->id)) {
       fprintf(stderr, "Circular dependency found between \"%s\" and \"%s\"\n", stat->name, subStat->name);
@@ -241,7 +214,7 @@ void CheckDeps(Stat *stat, HashMap *map, HashMap *valid, HashMap *pending, Stat 
 
 void PackStats(ResInfo *info, FILE *f)
 {
-  Stat *stats = ParseStatFile(f, info->size);
+  StatInfo *stats = ParseStatFile(f, info->size);
   HashMap map = EmptyHashMap;
 
   for (u32 i = 0; i < VecCount(stats); i++) {
@@ -251,7 +224,7 @@ void PackStats(ResInfo *info, FILE *f)
 
   HashMap valid = EmptyHashMap;
   HashMap pending = EmptyHashMap;
-  Stat **ordered = 0;
+  StatInfo **ordered = 0;
   for (u32 i = 0; i < VecCount(stats); i++) {
     CheckDeps(&stats[i], &map, &valid, &pending, stats, &ordered);
   }

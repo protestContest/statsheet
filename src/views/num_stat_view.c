@@ -26,7 +26,7 @@ static bool InputNumStatView(View *view, u16 input)
     i32 original = editStat->value;
     bool wasSignShowing = statView->control.showSign;
     statView->control.value = editStat->value;
-    statView->control.showSign = statView->editStat ? true : false;
+    statView->control.showSign = statView->editStat ? true : wasSignShowing;
     FillRect(&statView->control.asView.bounds, BG);
     Run(&statView->control.asView);
     if (KeyPressed(BTN_B)) {
@@ -38,7 +38,7 @@ static bool InputNumStatView(View *view, u16 input)
     statView->control.value = statView->stat->value;
     statView->control.showSign = wasSignShowing;
     FillRect(&statView->control.asView.bounds, BG);
-    DrawView(&statView->control.asView);
+    DrawView(&statView->asView);
   }
   return false;
 }
@@ -52,6 +52,7 @@ void InitNumStatView(NumStatView *view, Rect *bounds, char *title, char *statNam
   view->stat = GetStat(statName);
   view->title = title;
   view->control.value = view->stat->value;
+  view->editStat = 0;
   if (editStatName) {
     view->editStat = GetStat(editStatName);
   }

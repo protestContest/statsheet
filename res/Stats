@@ -19,7 +19,7 @@ ModCHA = CHA 2 / 5 -
 
 MaxHP = ModCON 4 + Level * 2 + TmpMaxHP +
 TmpMaxHP = 0
-HP = MaxHP
+HP = 0
 AC = 10 ModDEX + ArmorMod +
 ArmorMod = 0
 

@@ -1,4 +1,7 @@
 #include "hashmap.h"
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define HashMapMinSize        8
 

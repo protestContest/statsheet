@@ -1,6 +1,12 @@
 #pragma once
 
-#define IsDigit(c)  ((c) >= '0' && (c) <= '9')
+#define IsSpace(c)      ((c) == ' ' || (c) == '\t')
+#define IsWhitespace(c) (IsSpace(c) || (c) == '\n')
+#define IsDigit(c)      ((c) >= '0' && (c) <= '9')
+#define IsUppercase(c)  ((c) >= 'A' && (c) <= 'Z')
+#define IsLowercase(c)  ((c) >= 'a' && (c) <= 'z')
+#define IsAlpha(c)      (IsUppercase(c) || IsLowercase(c))
+#define IsSymChar(c)    (IsDigit(c) || IsAlpha(c))
 
 void ClearStr(char *str);
 u32 StrLen(char *str);

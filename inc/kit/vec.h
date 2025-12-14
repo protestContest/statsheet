@@ -1,7 +1,7 @@
 #pragma once
 
 #define NewVec(type, max)     ResizeVec(0, max, sizeof(type))
-#define FreeVec(vec)          ((vec) ? free(RawVec(vec)),0 : 0)
+#define FreeVec(vec)          ((vec) ? Free(RawVec(vec)),0 : 0)
 #define VecCapacity(vec)      ((vec) ? RawVecCap(vec) : 0)
 #define VecCount(vec)         ((vec) ? RawVecCount(vec) : 0)
 #define VecPush(vec, val)     (VecMakeRoom(vec, 1), (vec)[RawVecCount(vec)++] = val)

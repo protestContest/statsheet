@@ -1,5 +1,7 @@
 #include "vec.h"
 #include <string.h>
+#include <assert.h>
+#include <stdlib.h>
 
 void *ResizeVec(void *vec, u32 numItems, u32 itemSize)
 {

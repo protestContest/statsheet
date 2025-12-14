@@ -1,4 +1,6 @@
 #pragma once
+#include <stdio.h>
+#include <stdlib.h>
 
 #define IsSpace(c)      ((c) == ' ' || (c) == '\t')
 #define IsWhitespace(c) (IsSpace(c) || (c) == '\n')

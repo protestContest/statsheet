@@ -1,7 +1,6 @@
 #include "kit/canvas.h"
 #include "kit/mem.h"
 #include "kit/hardware.h"
-#include "kit/math.h"
 
 static PenState pen = {{0,0}, {1,1}, 0};
 static u16 bgColor = WHITE;
@@ -57,8 +56,8 @@ void LineTo(i16 x1, i16 y1)
   i16 x0 = pen.pos.h;
   i16 y0 = pen.pos.v;
 
-  i16 dx = abs(x1 - x0);
-  i16 dy = -abs(y1 - y0);
+  i16 dx = Abs(x1 - x0);
+  i16 dy = -Abs(y1 - y0);
   i16 step_x = (x0 < x1) ? 1 : -1;
   i16 step_y = (y0 < y1) ? 1 : -1;
   i16 err = dx + dy;
