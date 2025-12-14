@@ -1,13 +1,12 @@
-#include "kit.h"
-#include "menu.h"
+#include "kit/debug.h"
+#include "kit/init.h"
+#include "kit/sprite.h"
+#include "kit/text.h"
 #include "stat.h"
 #include "ui.h"
-#include "overview_page.h"
-#include "skills_page.h"
-#include "spells_page.h"
-#include "dice_page.h"
-
-Menu startMenu;
+#include "views/page.h"
+#include "views/page_list.h"
+#include "pages/overview_page.h"
 
 int main(void)
 {
@@ -20,33 +19,16 @@ int main(void)
 
   InitStats();
 
-  InitMenu(&startMenu);
-  AddMenuItem(&startMenu, "Short Rest", 0, 0);
-  AddMenuItem(&startMenu, "Long Rest", 0, 0);
+  PageList pages;
+  InitPageList(&pages);
 
-  Page *overview = InitOverviewPage();
-  Page *skills = InitSkillsPage();
-  Page *spells = InitSpellsPage();
-  Page *dice = InitDicePage();
+  Page overviewPage;
+  InitOverviewPage(&overviewPage);
+  AddPage(&pages, &overviewPage);
 
-  LinkPage(overview, skills);
-  LinkPage(skills, spells);
-  LinkPage(spells, dice);
-  LinkPage(dice, overview);
+  // Page skillsPage;
+  // InitPage(&skillsPage, "Skills");
+  // AddPage(&pages, &skillsPage);
 
-  SelectPage(overview);
-
-  while (true) {
-    VSync();
-    u16 input = GetInput();
-    if (KeyPressed(BTN_START)) {
-      ShowMenu(&startMenu);
-    } else if (KeyPressed(BTN_L)) {
-      PrevPage();
-    } else if (KeyPressed(BTN_R)) {
-      NextPage();
-    } else {
-      HandleInput(input);
-    }
-  }
+  Run(&pages.asView);
 }

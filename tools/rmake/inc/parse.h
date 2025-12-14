@@ -5,7 +5,8 @@
 #define IsDigit(c)      ((c) >= '0' && (c) <= '9')
 #define IsUppercase(c)  ((c) >= 'A' && (c) <= 'Z')
 #define IsLowercase(c)  ((c) >= 'a' && (c) <= 'z')
-#define IsSymChar(c)    (IsDigit(c) || IsUppercase(c) || IsLowercase(c) || (c) == '_')
+#define IsAlpha(c)      (IsUppercase(c) || IsLowercase(c))
+#define IsSymChar(c)    (IsDigit(c) || IsAlpha(c) || (c) == '_')
 
 #define SkipSpaces(cur, end) do {\
   while ((cur) < (end) && IsSpace(*(cur))) (cur)++;\

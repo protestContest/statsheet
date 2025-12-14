@@ -1,10 +1,8 @@
 #pragma once
-#include "kit.h"
 
 typedef struct {
   u32 id;
   i32 value;
-  u32 calcLen;
   u8 *calc;
   u32 numDeps;
   u32 *deps;

@@ -1,14 +1,14 @@
-Level: 6
+Level = 6
 
-Speed: 30
-PB: 3
+Speed = 30
+PB = 3
 
-STR: 9
-DEX: 12
-CON: 14
-INT: 18
-WIS: 14
-CHA: 10
+STR = 9
+DEX = 12
+CON = 14
+INT = 18
+WIS = 14
+CHA = 10
 
 ModSTR = STR 2 / 5 -
 ModDEX = DEX 2 / 5 -
@@ -18,10 +18,10 @@ ModWIS = WIS 2 / 5 -
 ModCHA = CHA 2 / 5 -
 
 MaxHP = ModCON 4 + Level * 2 + TmpMaxHP +
-TmpMaxHP: 0
-HP: MaxHP
+TmpMaxHP = 0
+HP = MaxHP
 AC = 10 ModDEX + ArmorMod +
-ArmorMod: 0
+ArmorMod = 0
 
 Initiative = ModDEX
 MeleeAttackMod = ModSTR PB +
@@ -51,11 +51,11 @@ Performance = ModCHA
 Persuasion = ModCHA
 
 L1Slots = 4
-L1SlotsUsed: 0
+L1SlotsUsed = 4
 L2Slots = 3
-L2SlotsUsed: 0
+L2SlotsUsed = 0
 L3Slots = 3
-L3SlotsUsed: 0
+L3SlotsUsed = 0
 
-InspirationUsed: 0
+InspirationUsed = 0
 InspirationMax = 1

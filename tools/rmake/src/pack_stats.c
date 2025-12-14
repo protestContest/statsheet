@@ -17,8 +17,7 @@ For each stat:
 */
 
 typedef enum {
-  opNoop = ' ',
-  opDefault = ':',
+  opHalt = 0,
   opConst = '#',
   opSmall = 128,
   opVar = '$',
@@ -27,14 +26,40 @@ typedef enum {
   opMul = '*',
   opDiv = '/',
   opRem = '%',
+  opAnd = '&',
+  opOr = '|',
+  opNot = '~',
+  opIf = '?',
+  opEq = '=',
+  opLt = '<',
+  opBlockStart = '[',
+  opBlockEnd = ']',
+  opCall = '.',
+  opDup = '"',
+  opDrop = '_',
+  opSwap = '\\',
+  opRot = '>',
 } OpCode;
 
-struct {char *name; OpCode op;} functionMap[] = {
-  {"+", opAdd},
-  {"-", opSub},
-  {"*", opMul},
-  {"/", opDiv},
-  {"%", opRem},
+struct {char name; OpCode op;} functionMap[] = {
+  {'+', opAdd},
+  {'-', opSub},
+  {'*', opMul},
+  {'/', opDiv},
+  {'%', opRem},
+  {'&', opAnd},
+  {'|', opOr},
+  {'~', opNot},
+  {'?', opIf},
+  {'=', opEq},
+  {'<', opLt},
+  {'[', opBlockStart},
+  {']', opBlockEnd},
+  {'.', opCall},
+  {'"', opDup},
+  {'_', opDrop},
+  {'\\', opSwap},
+  {'>', opRot},
 };
 
 typedef struct StatDep {
@@ -87,7 +112,7 @@ char *ParseCalculation(char **cur, char *end, StatDep **deps)
         VecPush(code, (num >> 24) & 0xFF);
       }
       SkipSpaces(*cur, end);
-    } else if (IsUppercase(**cur)) {
+    } else if (IsAlpha(**cur)) {
       char *start = *cur;
       while (*cur < end && IsSymChar(**cur)) {
         (*cur)++;
@@ -104,30 +129,23 @@ char *ParseCalculation(char **cur, char *end, StatDep **deps)
       VecPush(code, (dep->id >> 24) & 0xFF);
       SkipSpaces(*cur, end);
     } else {
-      char *start = *cur;
-      while (*cur < end && !IsWhitespace(**cur)) {
-        (*cur)++;
-      }
-      char *fn = malloc(*cur - start + 1);
-      memcpy(fn, start, *cur-start);
-      fn[*cur-start] = 0;
-
       bool found = false;
       for (u32 i = 0; i < ArrayCount(functionMap); i++) {
-        if (strcmp(functionMap[i].name, fn) == 0) {
+        if (functionMap[i].name == **cur) {
           found = true;
           VecPush(code, functionMap[i].op);
           break;
         }
       }
-      free(fn);
       if (!found) {
-        fprintf(stderr, "Unknown function \"%s\"\n", fn);
+        fprintf(stderr, "Unknown function \"%c\"\n", **cur);
         exit(99);
       }
+      (*cur)++;
       SkipSpaces(*cur, end);
     }
   }
+  VecPush(code, opHalt);
 
   return code;
 }
@@ -144,16 +162,12 @@ Stat *ParseStatFile(FILE *f, u32 size)
   char *cur = SkipWhitespace(data, end);
 
   while (cur < end) {
-    bool isDefault = false;
     stat.name = ParseName(&cur, end);
     stat.id = Hash(stat.name, strlen(stat.name));
     SkipSpaces(cur, end);
     if (cur == end || (*cur != '=' && *cur != ':')) {
       fprintf(stderr, "Expected \"=\" or \":\" in stat definition \"%s\"\n", stat.name);
       exit(99);
-    }
-    if (*cur == ':') {
-      isDefault = true;
     }
     cur++;
     SkipSpaces(cur, end);
@@ -168,11 +182,8 @@ Stat *ParseStatFile(FILE *f, u32 size)
       fprintf(stderr, "Expected expression in stat definition \"%s\"\n", stat.name);
       exit(99);
     }
-    if (isDefault) {
-      VecPush(stat.calc, opDefault);
-    }
     for (u32 i = VecCount(stat.calc); i < Align(VecCount(stat.calc), 4); i++) {
-      VecPush(stat.calc, opNoop);
+      VecPush(stat.calc, opHalt);
     }
 
     VecPush(stats, stat);
@@ -208,6 +219,7 @@ void CheckDeps(Stat *stat, HashMap *map, HashMap *valid, HashMap *pending, Stat 
   StatDep *dep = stat->deps;
   while (dep) {
     Stat *subStat = &stats[HashMapGet(map, dep->id)];
+
     if (HashMapContains(pending, dep->id)) {
       fprintf(stderr, "Circular dependency found between \"%s\" and \"%s\"\n", stat->name, subStat->name);
       exit(99);

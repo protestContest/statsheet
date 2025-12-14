@@ -1,9 +1,12 @@
 #pragma once
 #include "hardware.h"
 
+#define vertical 0
+#define horizontal 1
+
 typedef struct {
-  i16 h;
   i16 v;
+  i16 h;
 } Point;
 
 typedef struct {
