@@ -10,6 +10,8 @@ extern u16 Atan2(u16 x, u16 y);
 #define MIN_INT   0x80000000
 
 u32 Hash(void *data, u32 size);
+#define HashStr(s) Hash(s, StrLen(s))
+
 void SeedRandom(u32 seed);
 u32 Random(void);
 u32 RandomBetween(u32 low, u32 high);

@@ -3,6 +3,7 @@
 #include "kit/hashmap.h"
 #include "kit/math.h"
 #include "kit/mem.h"
+#include "kit/observe.h"
 #include "kit/res.h"
 #include "kit/str.h"
 #include "kit/vec.h"
@@ -132,6 +133,11 @@ void CalcStat(Stat *stat)
       stack[top-2] = (stack[top-2] < stack[top-1]) ? 1 : 0;
       top--;
       break;
+    case opGt:
+      Assert(top >= 2);
+      stack[top-2] = (stack[top-2] > stack[top-1]) ? 1 : 0;
+      top--;
+      break;
     case opQuote:
       Assert(top < ArrayCount(stack));
       stack[top++] = (i32)pc;
@@ -143,7 +149,7 @@ void CalcStat(Stat *stat)
       break;
     case opCall:
       Assert(top >= 1);
-      if (*pc != opReturn && *pc != opHalt) {
+      if (*pc != opReturn) {
         Assert(callTop < ArrayCount(callStack));
         callStack[callTop++] = pc;
       }
@@ -244,6 +250,7 @@ Stat *GetStatByID(u32 id)
   if (HashMapFetch(&statMap, id, &index)) {
     return statList + index;
   }
+  Error("Stat not found");
   return 0;
 }
 
@@ -263,6 +270,7 @@ static void UpdateStatRec(StatList *queue, StatList *end)
     CalcStat(child);
 
     if (child->value != oldValue) {
+      Notify(child, HashStr("STAT_CHANGED"));
       StatList *childNode = Alloc(sizeof(StatList));
       childNode->stat = child;
       childNode->next = 0;

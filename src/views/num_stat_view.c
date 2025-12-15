@@ -1,5 +1,7 @@
 #include "views/num_stat_view.h"
+#include "kit/debug.h"
 #include "kit/input.h"
+#include "kit/observe.h"
 #include "kit/str.h"
 #include "kit/text.h"
 #include "ui.h"
@@ -43,6 +45,14 @@ static bool InputNumStatView(View *view, u16 input)
   return false;
 }
 
+static void OnStatChange(View *view, Stat *stat, u32 event)
+{
+  NumStatView *statView = (NumStatView*)view;
+  statView->control.value = stat->value;
+  FillRect(&view->bounds, BG);
+  DrawView(view);
+}
+
 void InitNumStatView(NumStatView *view, Rect *bounds, char *title, char *statName, char *editStatName)
 {
   InitView(&view->asView, bounds, DrawNumStatView, InputNumStatView, 0);
@@ -50,10 +60,12 @@ void InitNumStatView(NumStatView *view, Rect *bounds, char *title, char *statNam
   InitNumControl(&view->control, &ctlBounds, 0, horizontal, false);
 
   view->stat = GetStat(statName);
+  Log(statName);
+  Observe(view->stat, view, (ObserveFn)OnStatChange);
   view->title = title;
   view->control.value = view->stat->value;
   view->editStat = 0;
-  if (editStatName) {
+  if (editStatName && *editStatName) {
     view->editStat = GetStat(editStatName);
   }
 }

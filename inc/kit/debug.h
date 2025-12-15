@@ -4,6 +4,7 @@
 
 bool EnableDebug(void);
 void Log(char *msg);
+void LogHex(u32 hex);
 void Error(char *msg);
 
 void AssertFail(char *file, u32 line);

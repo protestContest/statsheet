@@ -1,6 +1,9 @@
 #include "views/page_list.h"
 #include "kit/canvas.h"
+#include "kit/debug.h"
 #include "kit/input.h"
+#include "kit/mem.h"
+#include "kit/res.h"
 #include "kit/vec.h"
 #include "view.h"
 
@@ -17,9 +20,9 @@ static bool PageListInput(View *view, u16 input)
   PageList *list = (PageList*)view;
   if (VecCount(list->pages) == 0) return false;
   Page *page = list->pages[list->curPage];
-  if (KeyPressed(BTN_L)) {
+  if (VecCount(list->pages) > 1 && KeyPressed(BTN_L)) {
     SelectPage(list, list->curPage > 0 ? list->curPage - 1 : VecCount(list->pages) - 1);
-  } else if (KeyPressed(BTN_R)) {
+  } else if (VecCount(list->pages) > 1 && KeyPressed(BTN_R)) {
     SelectPage(list, list->curPage < VecCount(list->pages)-1 ? list->curPage + 1 : 0);
   } else {
     InputView(&page->asView, input);
@@ -55,4 +58,21 @@ void SelectPage(PageList *list, u32 pageNum)
   ActivateView(&list->pages[list->curPage]->asView, true);
   ClearScreen();
   DrawView(&list->pages[list->curPage]->asView);
+}
+
+PageList *BuildPageList(char *name)
+{
+  PageList *list = Alloc(sizeof(PageList));
+  InitPageList(list);
+  u8 *data = ResData(GetResource(name));
+  u32 len = ResLength(GetResource(name));
+  u8 *end = data + len;
+
+  while (data < end) {
+    Page *page = BuildPage(&data);
+    Assert(page);
+    AddPage(list, page);
+  }
+
+  return list;
 }

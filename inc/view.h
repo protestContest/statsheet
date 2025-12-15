@@ -1,6 +1,16 @@
 #pragma once
 #include "kit/canvas.h"
 
+typedef enum {
+  viewPage,
+  viewButton,
+  viewChargeControl,
+  viewChargeStat,
+  viewLabel,
+  viewNumControl,
+  viewNumStat
+} ViewType;
+
 struct View;
 typedef void (*ViewDraw)(struct View *view);
 typedef bool (*ViewInput)(struct View *view, u16 input);
@@ -17,3 +27,4 @@ typedef struct View {
 
 void InitView(View *view, Rect *bounds, ViewDraw draw, ViewInput onInput, ViewActivate activate);
 void Run(View *view);
+View *BuildView (u8 **description);

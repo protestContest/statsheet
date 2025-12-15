@@ -1,7 +1,18 @@
 Level = 6
 
+MaxHP = ModCON 4 + Level * 2 + TmpMaxHP +
+NumHitDie = Level
+HitDieType = 6
+AC = 10 ModDEX + ArmorMod +
 Speed = 30
-PB = 3
+PB = Level 1 - 4 / 2 +
+PasvPercep = 10 Perception +
+Initiative = ModDEX
+
+MeleeAttackMod = ModSTR PB +
+RangeAttackMod = ModDEX PB +
+SpellAttackMod = ModINT PB +
+SpellSaveDC = 8 ModINT + PB +
 
 STR = 9
 DEX = 12
@@ -17,45 +28,49 @@ ModINT = INT 2 / 5 -
 ModWIS = WIS 2 / 5 -
 ModCHA = CHA 2 / 5 -
 
-MaxHP = ModCON 4 + Level * 2 + TmpMaxHP +
-TmpMaxHP = 0
-HP = 0
-AC = 10 ModDEX + ArmorMod +
-ArmorMod = 0
-
-Initiative = ModDEX
-MeleeAttackMod = ModSTR PB +
-RangeAttackMod = ModDEX PB +
-SpellAttackMod = ModINT PB +
-SpellSaveDC = 8 ModINT + PB +
-PasvPercep = 10 Perception +
-
-Athletics = ModSTR
 Acrobatics = ModDEX
-SleightOfHand = ModDEX
-Stealth = ModDEX
-Arcana = ModINT PB +
-History = ModINT PB +
-Investigation = ModINT PB 2 * +
-Nature = ModINT
-Religion = ModINT
-
 AnimalHandling = ModWIS
-Insight = ModWIS
-Medicine = ModWIS
-Perception = ModWIS
-Survival = ModWIS
+Arcana = ModINT PB +
+Athletics = ModSTR
 Deception = ModCHA
+History = ModINT PB +
+Insight = ModWIS
 Intimidation = ModCHA
+Investigation = ModINT PB 2 * +
+
+Medicine = ModWIS
+Nature = ModINT
+Perception = ModWIS
 Performance = ModCHA
 Persuasion = ModCHA
+Religion = ModINT
+SleightOfHand = ModDEX
+Stealth = ModDEX
+Survival = ModWIS
 
-L1Slots = 4
+PrepCantrips = 3 Level 3 > + Level 9 > +
+PrepSpells = Level 3 + Level 4 > + Level 8 > + Level 11 > - Level 15 > +
+
+L1Slots = 2 Level 1 > + Level 2 > +
+L2Slots = 0 Level 2 > 2 * + Level 3 > +
+L3Slots = 0 Level 4 > 2 * + Level 5 > +
+L4Slots = 0 Level 6 > + Level 7 > + Level 8 > +
+L5Slots = 0 Level 8 > + Level 9 > + Level 17 > +
+L6Slots = 0 Level 10 > + Level 18 > +
+L7Slots = 0 Level 12 > + Level 19 > +
+L8Slots = Level 14 >
+L9Slots = Level 16 >
+
+
+
 L1SlotsUsed = 4
-L2Slots = 3
 L2SlotsUsed = 0
-L3Slots = 3
 L3SlotsUsed = 0
 
 InspirationUsed = 0
 InspirationMax = 1
+
+TmpMaxHP = 0
+HP = 0
+ArmorMod = 0
+

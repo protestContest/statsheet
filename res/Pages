@@ -1,0 +1,85 @@
+page "Overview"
+
+# 0: hp
+numStat (8, 15, 97, 26) "HP" "HP" ""
+link (-1, -1, 1, 2)
+
+# 1: maxHp
+numStat (98, 15, 116, 26) "/" "MaxHP" "TmpMaxHP"
+link (0, -1, 18, 2)
+
+# 2: ac
+numStat (8, 26, 116, 37) "AC" "AC" "ArmorMod"
+link (-1, 0, 18, 3)
+
+# 3: speed
+numStat (8, 37, 116, 48) "Speed" "Speed" ""
+link (-1, 2, 19, 4)
+
+# 4: spellSave
+numStat (8, 48, 116, 59) "Spell Save DC" "SpellSaveDC" ""
+link (-1, 3, 20, 5)
+
+# 5: str
+numStat (8, 67, 86, 78) "STR" "STR" ""
+link (-1, 4, 6, 7)
+
+# 6: strMod
+numStat (98, 67, 116, 78) "" "ModSTR" "" showSign
+link (5, 4, 20, 8)
+
+# 7: dex
+numStat (8, 78, 86, 89) "DEX" "DEX" ""
+link (-1, 5, 8, 9)
+
+# 8: dexMod
+numStat (98, 78, 116, 89) "" "ModDEX" "" showSign
+link (7, 6, 20, 10)
+
+# 9: con
+numStat (8, 89, 86, 100) "CON" "CON" ""
+link (-1, 7, 10, 11)
+
+# 10: conMod
+numStat (98, 89, 116, 100) "" "ModCON" "" showSign
+link (9, 8, 20, 12)
+
+# 11: int
+numStat (8, 100, 86, 111) "INT" "INT" ""
+link (-1, 9, 12, 13)
+
+# 12: intMod
+numStat (98, 100, 116, 111) "" "ModINT" "" showSign
+link (11, 10, 20, 14)
+
+# 13: wis
+numStat (8, 111, 86, 122) "WIS" "WIS" ""
+link (-1, 11, 14, 15)
+
+# 14: wisMod
+numStat (98, 111, 116, 122) "" "ModWIS" "" showSign
+link (13, 12, 20, 16)
+
+# 15: cha
+numStat (8, 122, 86, 133) "CHA" "CHA" ""
+link (-1, 13, 16, -1)
+
+# 16: chaMod
+numStat (98, 122, 116, 133) "" "ModCHA" "" showSign
+link (15, 14, 20, -1)
+
+# 17: spells label
+label (162, 15, 198, 26) "Spells"
+link (-1, -1, -1, -1)
+
+# 18: l1
+chargeStat (128, 30, 236, 41) "L1" "L1SlotsUsed" "L1Slots"
+link (2, -1, -1, 19)
+
+# 19: l2
+chargeStat (128, 41, 236, 52) "L2" "L2SlotsUsed" "L2Slots"
+link (3, 18, -1, 20)
+
+# 20: l3
+chargeStat (128, 52, 236, 63) "L3" "L3SlotsUsed" "L3Slots"
+link (4, 19, -1, -1)

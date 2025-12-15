@@ -34,13 +34,14 @@ struct {char name; OpCode op;} functionMap[] = {
   {'?', opIf},
   {'=', opEq},
   {'<', opLt},
+  {'>', opGt},
   {'[', opQuote},
   {']', opReturn},
   {'.', opCall},
   {':', opDup},
   {'_', opDrop},
   {'\\', opSwap},
-  {'>', opRot},
+  {';', opRot},
   {'"', opStr},
   {'!', opStore},
 };
@@ -74,6 +75,21 @@ void FreeStats(StatInfo *stats)
   FreeVec(stats);
 }
 
+void AddDep(u32 id, StatDep **deps)
+{
+  StatDep *dep = *deps;
+  while (dep) {
+    if (dep->id == id) {
+      return;
+    }
+    dep = dep->next;
+  }
+  dep = malloc(sizeof(StatDep));
+  dep->id = id;
+  dep->next = *deps;
+  *deps = dep;
+}
+
 char *ParseCalculation(char **cur, char *end, StatDep **deps)
 {
   char *code = 0;
@@ -92,10 +108,8 @@ char *ParseCalculation(char **cur, char *end, StatDep **deps)
         VecPush(code, **cur);
         (*cur)++;
       }
-      StatDep *dep = malloc(sizeof(StatDep));
-      dep->id = Hash(start, *cur - start);
-      dep->next = *deps;
-      *deps = dep;
+      AddDep(Hash(start, *cur - start), deps);
+
       VecPush(code, opNoop);
       SkipSpaces(*cur, end);
     } else if (**cur == opStore) {
@@ -135,6 +149,11 @@ StatInfo *ParseStatFile(FILE *f, u32 size)
   char *cur = SkipWhitespace(data, end);
 
   while (cur < end) {
+    if (*cur == '#') {
+      while (cur < end && *cur != '\n') cur++;
+      if (cur < end) cur++;
+      continue;
+    }
     stat.name = ParseName(&cur, end);
     stat.id = Hash(stat.name, strlen(stat.name));
     SkipSpaces(cur, end);

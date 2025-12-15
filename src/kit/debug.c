@@ -28,6 +28,13 @@ void Log(char *msg)
   *REG_DEBUG_FLAGS = MGBA_LOG_INFO | 0x100;
 }
 
+void LogHex(u32 hex)
+{
+  char msg[16] = {0};
+  HexToString(hex, msg);
+  Log(msg);
+}
+
 void Error(char *msg)
 {
   SetBackground(GRAY);
