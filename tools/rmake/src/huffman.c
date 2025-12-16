@@ -186,10 +186,12 @@ void HuffmanEncode(u8 *data, ResInfo *info)
   info->size = encSize;
 }
 
-void PackHuffman(ResInfo *info, FILE *f)
+void PackHuffman(ResInfo *info)
 {
+  FILE *f = fopen(info->path, "rb");
   u8 *data = malloc(info->size);
   fread(data, info->size, 1, f);
   HuffmanEncode(data, info);
   free(data);
+  fclose(f);
 }

@@ -1,10 +1,12 @@
 #include "runlength.h"
 #include "../../inc/kit/res.h"
 
-void PackRunLength(ResInfo *info, FILE *f)
+void PackRunLength(ResInfo *info)
 {
+  FILE *f = fopen(info->path, "rb");
   u8 *data = malloc(info->size);
   fread(data, info->size, 1, f);
+  fclose(f);
 
   u32 header = (info->size << 8) | (RunLength << 4);
   u32 size = sizeof(header);

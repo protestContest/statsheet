@@ -4,4 +4,4 @@
 #include <stdlib.h>
 
 void HuffmanEncode(u8 *data, ResInfo *info);
-void PackHuffman(ResInfo *info, FILE *f);
+void PackHuffman(ResInfo *info);

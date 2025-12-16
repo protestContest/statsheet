@@ -1,6 +1,6 @@
 #include "manifest.h"
-#include "../../inc/kit/res.h"
 #include "parse.h"
+#include "util.h"
 #include <string.h>
 #include <libgen.h>
 
@@ -50,20 +50,6 @@ static char *ReadManifest(char *path, u32 *size)
   return contents;
 }
 
-static u32 FileSize(char *path)
-{
-  FILE *file = fopen(path, "r+b");
-  if (!file) {
-    fprintf(stderr, "Could not open resource \"%s\"\n", path);
-    exit(2);
-  }
-
-  fseek(file, 0, SEEK_END);
-  u32 size = ftell(file);
-  fclose(file);
-  return size;
-}
-
 Manifest *ParseManifest(char *path)
 {
   Manifest *manifest = malloc(sizeof(Manifest));
@@ -77,15 +63,14 @@ Manifest *ParseManifest(char *path)
   char *contents = ReadManifest(path, &mSize);
 
   // parse the file
-  Parser p = {contents, contents + mSize};
+  Parser p = {contents, contents + mSize, path, 0, 0};
   while (!AtEnd(&p)) {
     ResInfo info = {0};
 
-    // find the first character (resource name)
     SkipWhitespace(&p);
     if (AtEnd(&p)) break;
 
-    info.name = ParseName(&p);
+    info.name = ParsePath(&p);
     info.id = Hash(info.name, strlen(info.name));
 
     while (!AtEnd(&p) && IsWhitespace(*p.cur) && *p.cur != '\n') p.cur++;

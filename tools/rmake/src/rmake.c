@@ -9,6 +9,7 @@
 #include "runlength.h"
 #include "pack_stats.h"
 #include "pack_strings.h"
+#include "util.h"
 
 /*
 Reads a manifest file and packs resources into a resource file. The manifest file is a list of
@@ -22,7 +23,7 @@ followed by an optional packing method:
 
 */
 
-typedef void (*PackFn)(ResInfo *info, FILE *f);
+typedef void (*PackFn)(ResInfo *info);
 
 typedef struct {
   char *name;
@@ -61,30 +62,23 @@ void Filter(u8 *data, u32 size, u32 dataSize)
 
 void EncodeItem(ResInfo *info)
 {
-  FILE *f = fopen(info->path, "r+b");
-  if (!f) {
-    fprintf(stderr, "Could not open \"%s\"\n", info->path);
-    exit(1);
-  }
-
-  fseek(f, 0, SEEK_END);
-  info->size = ftell(f);
-  fseek(f, 0, SEEK_SET);
+  info->size = FileSize(info->path);
 
   if (info->packMethod) {
     for (u32 i = 0; i < ArrayCount(methods); i++) {
       if (strcmp(methods[i].name, info->packMethod) == 0) {
-        methods[i].pack(info, f);
+        methods[i].pack(info);
         break;
       }
     }
   }
   if (!info->data) {
+    FILE *f = fopen(info->path, "rb");
     info->data = malloc(info->size + sizeof(u32));
     *((u32*)info->data) = info->size << 8;
     fread(info->data + sizeof(u32), info->size, 1, f);
+    fclose(f);
   }
-  fclose(f);
 }
 
 ResFile *NewResFile(Manifest *manifest)

@@ -1,5 +1,6 @@
 #include "parse.h"
 #include "vec.h"
+#include "util.h"
 #include <string.h>
 
 u32 Hash(void *data, u32 size)
@@ -13,20 +14,29 @@ u32 Hash(void *data, u32 size)
   return hash;
 }
 
+void Adv(Parser *p)
+{
+  if (Peek(p) == '\n') {
+    p->line++;
+    p->col = 0;
+  } else {
+    p->col++;
+  }
+  p->cur++;
+}
+
 void SkipWhitespace(Parser *p)
 {
-  while (p->cur < p->end && IsWhitespace(*p->cur)) {
-    if (*p->cur == '\n') p->line++;
-    p->cur++;
+  while (!AtEnd(p) && IsWhitespace(Peek(p))) {
+    Adv(p);
   }
 }
 
 void SkipLine(Parser *p)
 {
-  while (!AtEnd(p) && *p->cur != '\n') p->cur++;
+  while (!AtEnd(p) && Peek(p) != '\n') Adv(p);
   if (!AtEnd(p)) {
-    p->cur++;
-    p->line++;
+    Adv(p);
   }
 }
 
@@ -34,16 +44,15 @@ void Expect(Parser *p, char *expected)
 {
   char *orig = expected;
   while (!AtEnd(p) && *expected) {
-    if (*p->cur != *expected) {
-      fprintf(stderr, "Expected \"%s\" on line %d\n", orig, p->line+1);
+    if (Peek(p) != *expected) {
+      fprintf(stderr, "Expected \"%s\" at %s:%d:%d\n", orig, p->file, p->line+1, p->col+1);
       exit(99);
     }
-    if (*p->cur == '\n') p->line++;
-    p->cur++;
+    Adv(p);
     expected++;
   }
   if (*expected) {
-    fprintf(stderr, "Unexpected EOF");
+    fprintf(stderr, "Unexpected EOF in %s", p->file);
     exit(99);
   }
 }
@@ -51,7 +60,18 @@ void Expect(Parser *p, char *expected)
 char *ParseName(Parser *p)
 {
   char *start = p->cur;
-  while (p->cur < p->end && !IsWhitespace(*p->cur) && *p->cur != ':') (p->cur)++;
+  while (!AtEnd(p) && IsSymChar(Peek(p))) Adv(p);
+  u32 len = p->cur - start;
+  char *name = malloc(len + 1);
+  strncpy(name, start, len);
+  name[len] = 0;
+  return name;
+}
+
+char *ParsePath(Parser *p)
+{
+  char *start = p->cur;
+  while (!AtEnd(p) && !IsWhitespace(Peek(p))) Adv(p);
   u32 len = p->cur - start;
   char *name = malloc(len + 1);
   strncpy(name, start, len);
@@ -62,9 +82,9 @@ char *ParseName(Parser *p)
 u32 ParseID(Parser *p)
 {
   char *start = p->cur;
-  while (!AtEnd(p) && IsSymChar(*p->cur)) p->cur++;
+  while (!AtEnd(p) && IsSymChar(Peek(p))) Adv(p);
   if (start == p->cur) {
-    fprintf(stderr, "Expected ID\n");
+    fprintf(stderr, "Expected ID at %s:%d:%d\n", p->file, p->line+1, p->col+1);
     exit(99);
   }
   return Hash(start, p->cur - start);
@@ -74,17 +94,19 @@ i32 ParseNum(Parser *p)
 {
   i32 num = 0;
   i32 sign = 1;
-  if (*p->cur == '-') {
+  if (Peek(p) == '-') {
     sign = -1;
-    (p->cur)++;
+    Adv(p);
+
+    if (AtEnd(p) || !IsDigit(Peek(p))) {
+      fprintf(stderr, "Invalid number at %s:%d:%d\n", p->file, p->line+1, p->col+1);
+      exit(99);
+    }
   }
-  if (!IsDigit(*p->cur)) {
-    fprintf(stderr, "Invalid integer\n");
-    exit(99);
-  }
-  while (!AtEnd(p) && IsDigit(*p->cur)) {
-    num = num*10 + *p->cur - '0';
-    p->cur++;
+
+  while (!AtEnd(p) && IsDigit(Peek(p))) {
+    num = num*10 + Peek(p) - '0';
+    Adv(p);
   }
   return num * sign;
 }
@@ -94,7 +116,7 @@ u32 ParseString(Parser *p, char **strings)
   u32 value = VecCount(*strings);
   Expect(p, "\"");
   char *strStart = p->cur;
-  while (!AtEnd(p) && *p->cur != '"') p->cur++;
+  while (!AtEnd(p) && Peek(p) != '"') Adv(p);
   char *strEnd = p->cur;
   Expect(p, "\"");
   for (char *s = strStart; s < strEnd; s++) {

@@ -4,4 +4,4 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void PackStats(ResInfo *info, FILE *f);
+void PackStats(ResInfo *info);

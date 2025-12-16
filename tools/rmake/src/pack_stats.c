@@ -2,6 +2,7 @@
 #include "parse.h"
 #include "vec.h"
 #include "hashmap.h"
+#include "util.h"
 #include "../../inc/stat.h"
 #include <string.h>
 #include <assert.h>
@@ -22,28 +23,34 @@ For each stat:
 */
 
 
-struct {char name; OpCode op;} functionMap[] = {
-  {'+', opAdd},
-  {'-', opSub},
-  {'*', opMul},
-  {'/', opDiv},
-  {'%', opRem},
-  {'&', opAnd},
-  {'|', opOr},
-  {'~', opNot},
-  {'?', opIf},
-  {'=', opEq},
-  {'<', opLt},
-  {'>', opGt},
-  {'[', opQuote},
-  {']', opReturn},
-  {'.', opCall},
-  {':', opDup},
-  {'_', opDrop},
-  {'\\', opSwap},
-  {';', opRot},
-  {'"', opStr},
-  {'!', opStore},
+static bool ValidOp(u8 op)
+{
+  switch (op) {
+  case opAdd:
+  case opSub:
+  case opMul:
+  case opDiv:
+  case opRem:
+  case opAnd:
+  case opOr:
+  case opNot:
+  case opIf:
+  case opEq:
+  case opLt:
+  case opGt:
+  case opQuote:
+  case opReturn:
+  case opCall:
+  case opDup:
+  case opDrop:
+  case opSwap:
+  case opRot:
+  case opStr:
+  case opStore:
+    return true;
+  default:
+    return false;
+  }
 };
 
 typedef struct StatDep {
@@ -94,41 +101,34 @@ char *ParseCalculation(Parser *p, StatDep **deps)
 {
   char *code = 0;
 
-  while (!AtEnd(p) && *p->cur != '\n') {
-    if (IsDigit(*p->cur)) {
-      while (!AtEnd(p) && IsDigit(*p->cur)) {
-        VecPush(code, *p->cur);
-        p->cur++;
+  while (!AtEnd(p) && Peek(p) != '\n') {
+    if (IsDigit(Peek(p))) {
+      while (!AtEnd(p) && IsDigit(Peek(p))) {
+        VecPush(code, Peek(p));
+        Adv(p);
       }
       VecPush(code, opNoop);
       SkipSpaces(p);
-    } else if (IsAlpha(*p->cur)) {
+    } else if (IsAlpha(Peek(p))) {
       char *start = p->cur;
-      while (!AtEnd(p) && IsSymChar(*p->cur)) {
-        VecPush(code, *p->cur);
-        p->cur++;
+      while (!AtEnd(p) && IsSymChar(Peek(p))) {
+        VecPush(code, Peek(p));
+        Adv(p);
       }
       AddDep(Hash(start, p->cur - start), deps);
 
       VecPush(code, opNoop);
       SkipSpaces(p);
-    } else if (*p->cur == opStore) {
+    } else if (Peek(p) == opStore) {
       fprintf(stderr, "Store not allowed in stat definitions\n");
       exit(99);
     } else {
-      bool found = false;
-      for (u32 i = 0; i < ArrayCount(functionMap); i++) {
-        if (functionMap[i].name == *p->cur) {
-          found = true;
-          VecPush(code, functionMap[i].op);
-          break;
-        }
-      }
-      if (!found) {
-        fprintf(stderr, "Unknown function \"%c\"\n", *p->cur);
+      if (!ValidOp(Peek(p))) {
+        fprintf(stderr, "Unknown op \"%c\" at %s:%d:%d\n", Peek(p), p->file, p->line+1, p->col+1);
         exit(99);
       }
-      p->cur++;
+      VecPush(code, Peek(p));
+      Adv(p);
       SkipSpaces(p);
     }
   }
@@ -137,36 +137,33 @@ char *ParseCalculation(Parser *p, StatDep **deps)
   return code;
 }
 
-StatInfo *ParseStatFile(FILE *f, u32 size)
+StatInfo *ParseStatFile(char *path, u32 size)
 {
+  FILE *f = fopen(path, "rb");
   StatInfo *stats = 0;
   StatInfo stat;
 
   char *data = malloc(size);
   fread(data, size, 1, f);
+  fclose(f);
 
-  Parser p = {data, data + size, 0};
+  Parser p = {data, data + size, path, 0, 0};
   SkipWhitespace(&p);
 
   while (!AtEnd(&p)) {
-    if (*p.cur == '#') {
-      while (!AtEnd(&p) && *p.cur != '\n') p.cur++;
-      if (!AtEnd(&p)) p.cur++;
+    if (Peek(&p) == '#') {
+      SkipLine(&p);
+      SkipWhitespace(&p);
       continue;
     }
     stat.name = ParseName(&p);
     stat.id = Hash(stat.name, strlen(stat.name));
     SkipSpaces(&p);
-    if (AtEnd(&p) || (*p.cur != '=' && *p.cur != ':')) {
-      fprintf(stderr, "Expected \"=\" or \":\" in stat definition \"%s\"\n", stat.name);
-      exit(99);
-    }
-    p.cur++;
+    Expect(&p, "=");
+
     SkipSpaces(&p);
-    if (AtEnd(&p)) {
-      fprintf(stderr, "Expected expression in stat definition \"%s\"\n", stat.name);
-      exit(99);
-    }
+    Expect(&p, "");
+
     stat.deps = 0;
     stat.reverseDeps = 0;
     stat.calc = ParseCalculation(&p, &stat.deps);
@@ -231,9 +228,9 @@ void CheckDeps(StatInfo *stat, HashMap *map, HashMap *valid, HashMap *pending, S
   VecPush(*ordered, stat);
 }
 
-void PackStats(ResInfo *info, FILE *f)
+void PackStats(ResInfo *info)
 {
-  StatInfo *stats = ParseStatFile(f, info->size);
+  StatInfo *stats = ParseStatFile(info->path, info->size);
   HashMap map = EmptyHashMap;
 
   for (u32 i = 0; i < VecCount(stats); i++) {
