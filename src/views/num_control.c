@@ -33,11 +33,11 @@ static bool InputNumControl(View *view, u16 input)
     return true;
   } else if (KeyPressed(upBtn)) {
     ctl->value++;
-    FillRect(&view->bounds, BG);
+    EraseRect(&view->bounds);
     DrawView(view);
   } else if (KeyPressed(downBtn)) {
     ctl->value--;
-    FillRect(&view->bounds, BG);
+    EraseRect(&view->bounds);
     DrawView(view);
   }
   return false;
@@ -54,7 +54,7 @@ static void ActivateNumControl(View *view, bool active)
     FrameRect(&r);
     ShowArrows(&r, ctl->selectDir);
   } else {
-    FillRect(&r, BG);
+    EraseRect(&r);
     DrawView(view);
     HideArrows();
   }

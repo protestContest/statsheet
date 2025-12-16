@@ -7,6 +7,8 @@
 #include "kit/vec.h"
 #include "view.h"
 
+static PageList pages;
+
 static void PageListDraw(View *view)
 {
   PageList *list = (PageList*)view;
@@ -21,9 +23,9 @@ static bool PageListInput(View *view, u16 input)
   if (VecCount(list->pages) == 0) return false;
   Page *page = list->pages[list->curPage];
   if (VecCount(list->pages) > 1 && KeyPressed(BTN_L)) {
-    SelectPage(list, list->curPage > 0 ? list->curPage - 1 : VecCount(list->pages) - 1);
+    SelectPage(list->curPage > 0 ? list->curPage - 1 : VecCount(list->pages) - 1);
   } else if (VecCount(list->pages) > 1 && KeyPressed(BTN_R)) {
-    SelectPage(list, list->curPage < VecCount(list->pages)-1 ? list->curPage + 1 : 0);
+    SelectPage(list->curPage < VecCount(list->pages)-1 ? list->curPage + 1 : 0);
   } else {
     InputView(&page->asView, input);
   }
@@ -38,24 +40,35 @@ static void PageListActivate(View *view, bool active)
   ActivateView(&page->asView, active);
 }
 
-void InitPageList(PageList *list)
+void InitPageList(void)
 {
   Rect bounds = {0, 0, SCREEN_W, SCREEN_H};
-  InitView(&list->asView, &bounds, PageListDraw, PageListInput, PageListActivate);
-  list->pages = 0;
-  list->curPage = 0;
+  InitView(&pages.asView, &bounds, PageListDraw, PageListInput, PageListActivate);
+  pages.pages = 0;
+  pages.curPage = 0;
 }
 
-void AddPage(PageList *list, Page *page)
+void AddPage(Page *page)
 {
-  VecPush(list->pages, page);
+  VecPush(pages.pages, page);
 }
 
-void SelectPage(PageList *list, u32 pageNum)
+void SelectPage(u32 pageNum)
 {
-  ActivateView(&list->pages[list->curPage]->asView, false);
-  list->curPage = pageNum;
-  ActivateView(&list->pages[list->curPage]->asView, true);
+  ActivateView(&pages.pages[pages.curPage]->asView, false);
+  pages.curPage = pageNum;
+  ActivateView(&pages.pages[pages.curPage]->asView, true);
   ClearScreen();
-  DrawView(&list->pages[list->curPage]->asView);
+  DrawView(&pages.pages[pages.curPage]->asView);
+}
+
+View *GetPageList(void)
+{
+  return &pages.asView;
+}
+
+void RedrawPage(void)
+{
+  ClearScreen();
+  DrawView(GetPageList());
 }

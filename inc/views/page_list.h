@@ -8,6 +8,8 @@ typedef struct {
   u32 curPage;
 } PageList;
 
-void InitPageList(PageList *list);
-void AddPage(PageList *list, Page *page);
-void SelectPage(PageList *list, u32 pageNum);
+void InitPageList(void);
+void AddPage(Page *page);
+void SelectPage(u32 pageNum);
+View *GetPageList(void);
+void RedrawPage(void);

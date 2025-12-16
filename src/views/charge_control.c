@@ -27,11 +27,11 @@ static bool InputChargeControl(View *view, u16 input)
     return true;
   } else if (KeyPressed(BTN_RIGHT) && ctl->value < ctl->max) {
     ctl->value++;
-    FillRect(&view->bounds, BG);
+    EraseRect(&view->bounds);
     DrawView(view);
   } else if (KeyPressed(BTN_LEFT) && ctl->value > 0) {
     ctl->value--;
-    FillRect(&view->bounds, BG);
+    EraseRect(&view->bounds);
     DrawView(view);
   }
   return false;
@@ -47,7 +47,7 @@ static void ActivateChargeControl(View *view, bool active)
     FrameRect(&r);
     ShowArrows(&r, dirH);
   } else {
-    FillRect(&r, BG);
+    EraseRect(&r);
     DrawView(view);
     HideArrows();
   }

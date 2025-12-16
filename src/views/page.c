@@ -66,6 +66,9 @@ void PageActivate(View *view, bool active)
   } else {
     HideCursor();
   }
+  for (u32 i = 0; i < VecCount(page->views); i++) {
+    ActivateView(page->views[i], active);
+  }
 }
 
 void AddPageView(Page *page, View *view)

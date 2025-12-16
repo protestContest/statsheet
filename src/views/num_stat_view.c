@@ -4,6 +4,7 @@
 #include "ui.h"
 #include "views/num_control.h"
 #include "kit/text.h"
+#include "dice_check.h"
 
 static void DrawNumStatView(View *view)
 {
@@ -21,7 +22,7 @@ static bool InputNumStatView(View *view, u16 input)
     bool wasSignShowing = statView->control.showSign;
     statView->control.value = editStat->value;
     statView->control.showSign = statView->editStat ? true : wasSignShowing;
-    FillRect(&statView->control.asView.bounds, BG);
+    EraseRect(&statView->control.asView.bounds);
     Run(&statView->control.asView);
     if (KeyPressed(BTN_B)) {
       editStat->value = original;
@@ -31,8 +32,10 @@ static bool InputNumStatView(View *view, u16 input)
 
     statView->control.value = statView->stat->value;
     statView->control.showSign = wasSignShowing;
-    FillRect(&statView->control.asView.bounds, BG);
+    EraseRect(&statView->control.asView.bounds);
     DrawView(&statView->asView);
+  } else if (KeyPressed(BTN_A)) {
+    StatDiceCheck(statView->stat);
   }
   return false;
 }
@@ -41,13 +44,21 @@ static void OnStatChange(View *view, Stat *stat, u32 event)
 {
   NumStatView *statView = (NumStatView*)view;
   statView->control.value = stat->value;
-  FillRect(&view->bounds, BG);
-  DrawView(view);
+  if (statView->active) {
+    EraseRect(&view->bounds);
+    DrawView(view);
+  }
+}
+
+static void NumStatViewActivate(View *view, bool active)
+{
+  NumStatView *statView = (NumStatView*)view;
+  statView->active = active;
 }
 
 void InitNumStatView(NumStatView *view, Rect *bounds, char *title, char *statName, char *editStatName)
 {
-  InitView(&view->asView, bounds, DrawNumStatView, InputNumStatView, 0);
+  InitView(&view->asView, bounds, DrawNumStatView, InputNumStatView, NumStatViewActivate);
 
   Rect childBounds = *bounds;
   childBounds.right = childBounds.left + TextWidth(title);
@@ -63,4 +74,5 @@ void InitNumStatView(NumStatView *view, Rect *bounds, char *title, char *statNam
   if (editStatName && *editStatName) {
     view->editStat = GetStat(editStatName);
   }
+  view->active = false;
 }

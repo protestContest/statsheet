@@ -180,10 +180,10 @@ static i16 DoString(char *str, FontRec *rec, bool draw)
       }
     }
 
-    if (font_type == propFont) {
-      x += width;
-    } else if (font_type == fixedFont) {
+    if (font_type == fixedFont) {
       x += rec->wid_max;
+    } else {
+      x += width;
     }
 
     if (x > end) end = x;

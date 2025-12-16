@@ -26,7 +26,7 @@ static bool InputChargeStatView(View *view, u16 input)
     if (KeyPressed(BTN_B)) {
       statView->stat->value = original;
       statView->control.value = original;
-      FillRect(&statView->control.asView.bounds, BG);
+      EraseRect(&statView->control.asView.bounds);
       DrawView(&statView->control.asView);
     } else {
       UpdateStat(statView->stat, statView->control.value);

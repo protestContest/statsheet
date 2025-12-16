@@ -10,6 +10,7 @@ typedef struct {
   Stat *editStat;
   Label label;
   NumControl control;
+  bool active;
 } NumStatView;
 
 void InitNumStatView(NumStatView *view, Rect *bounds, char *title, char *statName, char *editStatName);

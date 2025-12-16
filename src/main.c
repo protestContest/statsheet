@@ -22,20 +22,19 @@ int main(void)
   InitStats();
   InitSpells();
 
-  PageList pages;
-  InitPageList(&pages);
+  InitPageList();
 
   Page overviewPage;
   InitOverviewPage(&overviewPage);
-  AddPage(&pages, &overviewPage);
+  AddPage(&overviewPage);
 
   Page skillsPage;
   InitSkillsPage(&skillsPage);
-  AddPage(&pages, &skillsPage);
+  AddPage(&skillsPage);
 
   Page spellsPage;
   InitSpellListPage(&spellsPage);
-  AddPage(&pages, &spellsPage);
+  AddPage(&spellsPage);
 
-  Run(&pages.asView);
+  Run(GetPageList());
 }

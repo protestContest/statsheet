@@ -2,7 +2,6 @@
 #include "kit/canvas.h"
 #include "kit/input.h"
 #include "kit/vec.h"
-#include "ui.h"
 
 static void DrawTabView(View *view)
 {
@@ -18,11 +17,11 @@ static bool TabViewInput(View *view, u16 input)
   TabView *tabView = (TabView*)view;
   if (KeyPressed(BTN_LEFT) && tabView->selectedTab > 0) {
     tabView->selectedTab--;
-    FillRect(&view->bounds, BG);
+    EraseRect(&view->bounds);
     DrawTabView(view);
   } else if (KeyPressed(BTN_RIGHT) && tabView->selectedTab < VecCount(tabView->tabs)-1) {
     tabView->selectedTab++;
-    FillRect(&view->bounds, BG);
+    EraseRect(&view->bounds);
     DrawTabView(view);
   }
   return false;
