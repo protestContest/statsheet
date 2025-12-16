@@ -3,6 +3,7 @@
 #include "kit/sprite.h"
 #include "kit/text.h"
 #include "pages/overview_page.h"
+#include "pages/skills_page.h"
 #include "stat.h"
 #include "ui.h"
 #include "views/page_list.h"
@@ -24,6 +25,10 @@ int main(void)
   Page overviewPage;
   InitOverviewPage(&overviewPage);
   AddPage(&pages, &overviewPage);
+
+  Page skillsPage;
+  InitSkillsPage(&skillsPage);
+  AddPage(&pages, &skillsPage);
 
   Run(&pages.asView);
 }
