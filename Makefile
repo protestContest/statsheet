@@ -1,5 +1,5 @@
-NAME := bisquik
-GAME_TITLE := BISQUIK
+NAME := statsheet
+GAME_TITLE := STATSHEET
 GAME_CODE := ZACK
 
 DEFINES :=

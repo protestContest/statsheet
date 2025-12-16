@@ -1,32 +1,43 @@
 {
-	"folders":
-	[
-		{
-			"path": ".",
-		}
-	],
 	"build_systems":
 	[
 		{
-			"name": "Make Buisquik",
 			"cmd": "make",
 			"file_regex": "^(..[^:\n]*):([0-9]+):?([0-9]+)?:? (.*)$",
-			"working_dir": "${folder:${project_path:${file_path}}}",
+			"keyfiles":
+			[
+				"Makefile",
+				"makefile"
+			],
+			"name": "Make Buisquik",
 			"selector": "source.makefile",
 			"syntax": "Packages/Makefile/Make Output.sublime-syntax",
-			"keyfiles": ["Makefile", "makefile"],
-
 			"variants":
 			[
 				{
-					"name": "Clean",
-					"cmd": ["make", "clean"],
+					"cmd":
+					[
+						"make",
+						"clean"
+					],
+					"name": "Clean"
 				},
 				{
-					"name": "Run",
-					"cmd": ["make", "run"],
+					"cmd":
+					[
+						"make",
+						"run"
+					],
+					"name": "Run"
 				}
 			],
+			"working_dir": "${folder:${project_path:${file_path}}}"
+		}
+	],
+	"folders":
+	[
+		{
+			"path": "."
 		}
 	],
 	"settings":
@@ -38,5 +49,5 @@
 				"enabled": true
 			}
 		}
-	},
+	}
 }
