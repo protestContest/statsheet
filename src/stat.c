@@ -185,6 +185,12 @@ void CalcStat(Stat *stat)
       stack[top++] = Hash(start, pc-start);
       pc++;
       break;
+    case opFetch:
+      Assert(top >= 1);
+      Assert(HashMapFetch(&statMap, stack[top-1], &index));
+      s = &statList[index];
+      stack[top-1] = s->value;
+      break;
     case opStore:
       Assert(top >= 2);
       Assert(HashMapFetch(&statMap, stack[--top], &index));

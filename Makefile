@@ -1,4 +1,6 @@
 NAME := statsheet
+
+# ROM strings (see tools/romfix)
 GAME_TITLE := STATSHEET
 GAME_CODE := ZACK
 

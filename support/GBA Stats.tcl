@@ -1,3 +1,5 @@
+# HexFiend template for a packed stats file
+
 little_endian
 
 set numStats [uint32 "Num Stats"]

@@ -17,11 +17,10 @@ u32 numStats;
 For each stat:
   u32 id;
   u32 codeLen;
-  u8 code[codeLen];
+  u8 code[codeLen]; (padded to 4 bytes)
   u32 numDeps;
   u32 depIDs[numDeps];
 */
-
 
 static bool ValidOp(u8 op)
 {
@@ -156,6 +155,14 @@ StatInfo *ParseStatFile(char *path, u32 size)
       SkipWhitespace(&p);
       continue;
     }
+    if (Match(&p, "---\n")) {
+      while (!AtEnd(&p) && !Match(&p, "---\n")) Adv(&p);
+      if (AtEnd(&p)) {
+        break;
+      }
+      SkipWhitespace(&p);
+    }
+
     stat.name = ParseName(&p);
     stat.id = Hash(stat.name, strlen(stat.name));
     SkipSpaces(&p);

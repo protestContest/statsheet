@@ -28,6 +28,7 @@ void Adv(Parser *p);
 void SkipWhitespace(Parser *p);
 void SkipLine(Parser *p);
 void Expect(Parser *p, char *expected);
+bool Match(Parser *p, char *expected);
 char *ParseName(Parser *p);
 char *ParsePath(Parser *p);
 u32 ParseID(Parser *p);

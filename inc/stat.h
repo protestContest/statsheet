@@ -23,6 +23,7 @@ typedef enum {
   opSwap = '\\',
   opRot = ';',
   opStr = '"',
+  opFetch = '@',
   opStore = '!',
 } OpCode;
 

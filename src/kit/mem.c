@@ -1,6 +1,5 @@
 #include "kit/mem.h"
 #include "kit/debug.h"
-#include "kit/str.h"
 #include "prefix.h"
 
 /*

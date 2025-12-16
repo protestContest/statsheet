@@ -7,6 +7,7 @@
 entrypoint:
     b       header_end
 
+    // ROM header
     .fill   156, 1, 0   // Nintendo Logo
     .fill   12, 1, 0    // Game Title
     .fill   4, 1, 0     // Game Code
@@ -102,6 +103,8 @@ start_vector:
 go:
     bx      r2
     // If main() returns, reboot the GBA using SoftReset
+
+/* BIOS Function hooks */
 
     .global Reset
 Reset:

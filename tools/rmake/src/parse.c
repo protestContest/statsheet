@@ -57,6 +57,24 @@ void Expect(Parser *p, char *expected)
   }
 }
 
+bool Match(Parser *p, char *expected)
+{
+  char *orig = p->cur;
+  while (!AtEnd(p) && *expected) {
+    if (Peek(p) != *expected) {
+      p->cur = orig;
+      return false;
+    }
+    Adv(p);
+    expected++;
+  }
+  if (*expected) {
+    p->cur = orig;
+    return false;
+  }
+  return true;
+}
+
 char *ParseName(Parser *p)
 {
   char *start = p->cur;

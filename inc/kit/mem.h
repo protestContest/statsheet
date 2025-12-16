@@ -5,7 +5,6 @@ numWords is rounded up to a multiple of 8
 numWords is a 20-bit uint
 src and dst must be word aligned
 */
-
 extern void BlockFill(void *src, void *dst, u32 numWords);
 extern void BlockCopy(void *src, void *dst, u32 numWords);
 
