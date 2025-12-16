@@ -195,3 +195,8 @@ extern void VBlankIntrWait(void);
 #define CRAM            ((volatile u16*)0x06010000)
 #define BG_PALETTE      ((volatile u16*)0x05000000)
 #define OBJ_PALETTE     ((volatile u16*)0x05000200)
+
+
+
+// Save data
+#define SAVE_DATA       ((volatile u8*)0x0E000000)

@@ -4,7 +4,7 @@
 typedef struct {
   View asView;
   i32 value;
-  bool selectDir;
+  VHSelect selectDir;
   bool showSign;
 } NumControl;
 

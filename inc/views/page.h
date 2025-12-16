@@ -3,10 +3,10 @@
 
 typedef struct {
   View *view;
-  i32 up;
-  i32 down;
-  i32 left;
-  i32 right;
+  View *left;
+  View *top;
+  View *right;
+  View *bottom;
 } PageElement;
 
 typedef struct {
@@ -17,11 +17,11 @@ typedef struct {
 } Page;
 
 void InitPage(Page *page, char *title);
-Page *BuildPage(u8 **description);
 void PageDraw(View *view);
 bool PageInput(View *view, u16 input);
 void PageActivate(View *view, bool active);
 void AddPageView(Page *page, View *view);
+
 void LinkViewUp(Page *page, View *view, View *up);
 void LinkViewDown(Page *page, View *view, View *down);
 void LinkViewLeft(Page *page, View *view, View *left);

@@ -27,8 +27,8 @@ static bool InputNumControl(View *view, u16 input)
   NumControl *ctl = (NumControl*)view;
   FontInfo info;
   GetFontInfo(&info);
-  u16 upBtn = ctl->selectDir == vertical ? BTN_UP : BTN_RIGHT;
-  u16 downBtn = ctl->selectDir == vertical ? BTN_DOWN : BTN_LEFT;
+  u16 upBtn = ctl->selectDir == dirV ? BTN_UP : BTN_RIGHT;
+  u16 downBtn = ctl->selectDir == dirV ? BTN_DOWN : BTN_LEFT;
   if (KeyPressed(BTN_A) || KeyPressed(BTN_B)) {
     return true;
   } else if (KeyPressed(upBtn)) {

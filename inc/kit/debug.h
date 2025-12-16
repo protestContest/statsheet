@@ -4,6 +4,7 @@
 
 bool EnableDebug(void);
 void Log(char *msg);
+void LogNum(i32 num);
 void LogHex(u32 hex);
 void Error(char *msg);
 

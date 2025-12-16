@@ -1,8 +1,7 @@
 #pragma once
 #include "hardware.h"
 
-#define vertical 0
-#define horizontal 1
+typedef enum {dirV, dirH} VHSelect;
 
 typedef struct {
   i16 v;

@@ -15,7 +15,7 @@ void Alert(char *text);
 void ShowCursor(void);
 void HideCursor(void);
 void PlaceCursor(i16 x, i16 y);
-void ShowArrows(Rect *bounds, bool selectDir);
+void ShowArrows(Rect *bounds, VHSelect selectDir);
 void HideArrows(void);
 void HideAllObjs(void);
 

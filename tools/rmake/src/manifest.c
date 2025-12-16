@@ -77,22 +77,21 @@ Manifest *ParseManifest(char *path)
   char *contents = ReadManifest(path, &mSize);
 
   // parse the file
-  char *fileEnd = contents + mSize;
-  char *cur = contents;
-  while (cur < fileEnd) {
+  Parser p = {contents, contents + mSize};
+  while (!AtEnd(&p)) {
     ResInfo info = {0};
 
     // find the first character (resource name)
-    cur = SkipWhitespace(cur, fileEnd);
-    if (cur == fileEnd) break;
+    SkipWhitespace(&p);
+    if (AtEnd(&p)) break;
 
-    info.name = ParseName(&cur, fileEnd);
+    info.name = ParseName(&p);
     info.id = Hash(info.name, strlen(info.name));
 
-    while (cur < fileEnd && IsWhitespace(*cur) && *cur != '\n') cur++;
+    while (!AtEnd(&p) && IsWhitespace(*p.cur) && *p.cur != '\n') p.cur++;
 
-    if (cur < fileEnd && *cur != '\n') {
-      info.packMethod = ParseName(&cur, fileEnd);
+    if (!AtEnd(&p) && *p.cur != '\n') {
+      info.packMethod = ParseName(&p);
     }
 
     info.path = PathJoin(manifest->path, info.name);

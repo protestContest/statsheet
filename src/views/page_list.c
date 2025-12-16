@@ -59,20 +59,3 @@ void SelectPage(PageList *list, u32 pageNum)
   ClearScreen();
   DrawView(&list->pages[list->curPage]->asView);
 }
-
-PageList *BuildPageList(char *name)
-{
-  PageList *list = Alloc(sizeof(PageList));
-  InitPageList(list);
-  u8 *data = ResData(GetResource(name));
-  u32 len = ResLength(GetResource(name));
-  u8 *end = data + len;
-
-  while (data < end) {
-    Page *page = BuildPage(&data);
-    Assert(page);
-    AddPage(list, page);
-  }
-
-  return list;
-}

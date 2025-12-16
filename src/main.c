@@ -2,6 +2,7 @@
 #include "kit/init.h"
 #include "kit/sprite.h"
 #include "kit/text.h"
+#include "pages/overview_page.h"
 #include "stat.h"
 #include "ui.h"
 #include "views/page_list.h"
@@ -17,7 +18,12 @@ int main(void)
 
   InitStats();
 
-  PageList *pages = BuildPageList("Pages");
+  PageList pages;
+  InitPageList(&pages);
 
-  Run(&pages->asView);
+  Page overviewPage;
+  InitOverviewPage(&overviewPage);
+  AddPage(&pages, &overviewPage);
+
+  Run(&pages.asView);
 }

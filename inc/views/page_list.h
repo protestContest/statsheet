@@ -11,4 +11,3 @@ typedef struct {
 void InitPageList(PageList *list);
 void AddPage(PageList *list, Page *page);
 void SelectPage(PageList *list, u32 pageNum);
-PageList *BuildPageList(char *name);

@@ -1,22 +1,14 @@
 #include "views/num_stat_view.h"
-#include "kit/debug.h"
 #include "kit/input.h"
 #include "kit/observe.h"
-#include "kit/str.h"
-#include "kit/text.h"
 #include "ui.h"
 #include "views/num_control.h"
+#include "kit/text.h"
 
 static void DrawNumStatView(View *view)
 {
   NumStatView *statView = (NumStatView*)view;
-  FontInfo info;
-  GetFontInfo(&info);
-
-  SetColor(BLACK);
-  MoveTo(view->bounds.left, view->bounds.top + info.ascent);
-  Print(statView->title);
-
+  DrawView(&statView->label.asView);
   DrawView(&statView->control.asView);
 }
 
@@ -56,13 +48,16 @@ static void OnStatChange(View *view, Stat *stat, u32 event)
 void InitNumStatView(NumStatView *view, Rect *bounds, char *title, char *statName, char *editStatName)
 {
   InitView(&view->asView, bounds, DrawNumStatView, InputNumStatView, 0);
-  Rect ctlBounds = {bounds->right - TextWidth("+00"), bounds->top, bounds->right, bounds->bottom};
-  InitNumControl(&view->control, &ctlBounds, 0, horizontal, false);
+
+  Rect childBounds = *bounds;
+  childBounds.right = childBounds.left + TextWidth(title);
+  InitLabel(&view->label, &childBounds, title);
+  childBounds = *bounds;
+  childBounds.left = childBounds.right - TextWidth("000");
+  InitNumControl(&view->control, &childBounds, 0, dirH, false);
 
   view->stat = GetStat(statName);
-  Log(statName);
   Observe(view->stat, view, (ObserveFn)OnStatChange);
-  view->title = title;
   view->control.value = view->stat->value;
   view->editStat = 0;
   if (editStatName && *editStatName) {

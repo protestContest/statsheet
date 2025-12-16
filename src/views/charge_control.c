@@ -45,7 +45,7 @@ static void ActivateChargeControl(View *view, bool active)
   if (active) {
     SetColor(BLACK);
     FrameRect(&r);
-    ShowArrows(&r, horizontal);
+    ShowArrows(&r, dirH);
   } else {
     FillRect(&r, BG);
     DrawView(view);

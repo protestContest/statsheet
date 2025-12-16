@@ -6,4 +6,4 @@ typedef struct {
   char *title;
 } Label;
 
-void InitLabel(Label *label, i16 x, i16 y, char *title);
+void InitLabel(Label *label, Rect *bounds, char *title);

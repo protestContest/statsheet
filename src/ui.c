@@ -97,9 +97,9 @@ void PlaceCursor(i16 x, i16 y)
   PlaceObj(cursorObj, x-8, y-3);
 }
 
-void ShowArrows(Rect *bounds, bool selectDir)
+void ShowArrows(Rect *bounds, VHSelect selectDir)
 {
-  if (selectDir == horizontal) {
+  if (selectDir == dirH) {
     HideObj(arrowUpObj);
     HideObj(arrowDownObj);
     PlaceObj(arrowLeftObj, bounds->left - 7, bounds->top + (bounds->bottom - bounds->top)/2 - 3);

@@ -18,7 +18,7 @@ void InitOverviewPage(Page *page)
   NumStatView *hp = Alloc(sizeof(NumStatView));
 
   SetRect(&bounds, 8, 15, SCREEN_W/2-4 - TextWidth(" / 00"), 26);
-  InitNumStatView(hp, &bounds, "HP", "HP", "TmpHP");
+  InitNumStatView(hp, &bounds, "HP", "HP", "");
   AddPageView(page, &hp->asView);
 
   NumStatView *maxHp = Alloc(sizeof(NumStatView));
@@ -134,7 +134,8 @@ void InitOverviewPage(Page *page)
   LinkViewBeside(page, &cha->asView, &chaMod->asView);
 
   Label *l = Alloc(sizeof(Label));
-  InitLabel(l, SCREEN_W*3/4-TextWidth("Spells")/2, 15, "Spells");
+  SetRect(&bounds, SCREEN_W*3/4-TextWidth("Spells")/2, 15, SCREEN_W*3/4+TextWidth("Spells")/2, 15 + LineHeight());
+  InitLabel(l, &bounds, "Spells");
   AddPageView(page, &l->asView);
 
   SetRect(&bounds, SCREEN_W/2+8, 15+lineHeight+4, SCREEN_W-4, 15+2*lineHeight);

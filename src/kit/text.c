@@ -209,6 +209,13 @@ void GetFontInfo(FontInfo *info)
   info->leading = currentFont->leading;
 }
 
+i16 LineHeight(void)
+{
+  FontInfo info = {0};
+  GetFontInfo(&info);
+  return info.ascent + info.descent;
+}
+
 void Print(char *str)
 {
   Assert(currentFont);

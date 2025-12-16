@@ -7,32 +7,31 @@ void PackStrings(ResInfo *info, FILE *f)
   *((u32*)info->data) = info->size << 8;
   fread(info->data + sizeof(u32), info->size, 1, f);
 
-  char *end = (char*)info->data + info->size + sizeof(u32);
-  char *cur = (char*)info->data + sizeof(u32);
+  Parser p = {info->data + sizeof(u32), info->data + info->size + sizeof(u32), 0};
   u32 numSpells = 0;
-  while (cur < end) {
-    cur = SkipWhitespace(cur, end);
-    if (cur == end) break;
+  while (!AtEnd(&p)) {
+    SkipWhitespace(&p);
+    if (AtEnd(&p)) break;
 
     // header
-    while (cur < end && *cur != '\n') {
-      if (*cur == '\t') *cur = 0;
-      cur++;
+    while (!AtEnd(&p) && *p.cur != '\n') {
+      if (*p.cur == '\t') *p.cur = 0;
+      p.cur++;
     }
 
-    if (cur == end) break;
-    *cur = 0;
-    cur++;
+    if (AtEnd(&p)) break;
+    *p.cur = 0;
+    p.cur++;
 
     // description
-    while (cur < end) {
-      if (cur < end-1 && cur[0] == '\n' && cur[1] == '\n') {
-        *cur = 0;
-        cur++;
+    while (!AtEnd(&p)) {
+      if (p.end > p.cur && p.cur[0] == '\n' && p.cur[1] == '\n') {
+        *p.cur = 0;
+        p.cur++;
         numSpells++;
         break;
       }
-      cur++;
+      p.cur++;
     }
   }
   fprintf(stderr, "Parsed %d spells\n", numSpells);

@@ -103,7 +103,10 @@ void *Alloc(u32 bytes)
 
   i32 size = Align(bytes, 4)/4;  // convert size to words
   i32 *block = Seek(FirstBlock, size);  // find block big enough
-  if (!block) return 0; // no big enough block found
+  if (!block) {
+    Error("Out of memory");
+    return 0;
+  }
 
   SplitBlock(block, size);  // split block into allocated/free
 

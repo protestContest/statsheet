@@ -90,46 +90,46 @@ void AddDep(u32 id, StatDep **deps)
   *deps = dep;
 }
 
-char *ParseCalculation(char **cur, char *end, StatDep **deps)
+char *ParseCalculation(Parser *p, StatDep **deps)
 {
   char *code = 0;
 
-  while (*cur < end && **cur != '\n') {
-    if (IsDigit(**cur)) {
-      while (*cur < end && IsDigit(**cur)) {
-        VecPush(code, **cur);
-        (*cur)++;
+  while (!AtEnd(p) && *p->cur != '\n') {
+    if (IsDigit(*p->cur)) {
+      while (!AtEnd(p) && IsDigit(*p->cur)) {
+        VecPush(code, *p->cur);
+        p->cur++;
       }
       VecPush(code, opNoop);
-      SkipSpaces(*cur, end);
-    } else if (IsAlpha(**cur)) {
-      char *start = *cur;
-      while (*cur < end && IsSymChar(**cur)) {
-        VecPush(code, **cur);
-        (*cur)++;
+      SkipSpaces(p);
+    } else if (IsAlpha(*p->cur)) {
+      char *start = p->cur;
+      while (!AtEnd(p) && IsSymChar(*p->cur)) {
+        VecPush(code, *p->cur);
+        p->cur++;
       }
-      AddDep(Hash(start, *cur - start), deps);
+      AddDep(Hash(start, p->cur - start), deps);
 
       VecPush(code, opNoop);
-      SkipSpaces(*cur, end);
-    } else if (**cur == opStore) {
+      SkipSpaces(p);
+    } else if (*p->cur == opStore) {
       fprintf(stderr, "Store not allowed in stat definitions\n");
       exit(99);
     } else {
       bool found = false;
       for (u32 i = 0; i < ArrayCount(functionMap); i++) {
-        if (functionMap[i].name == **cur) {
+        if (functionMap[i].name == *p->cur) {
           found = true;
           VecPush(code, functionMap[i].op);
           break;
         }
       }
       if (!found) {
-        fprintf(stderr, "Unknown function \"%c\"\n", **cur);
+        fprintf(stderr, "Unknown function \"%c\"\n", *p->cur);
         exit(99);
       }
-      (*cur)++;
-      SkipSpaces(*cur, end);
+      p->cur++;
+      SkipSpaces(p);
     }
   }
   VecPush(code, opHalt);
@@ -145,31 +145,31 @@ StatInfo *ParseStatFile(FILE *f, u32 size)
   char *data = malloc(size);
   fread(data, size, 1, f);
 
-  char *end = data + size;
-  char *cur = SkipWhitespace(data, end);
+  Parser p = {data, data + size, 0};
+  SkipWhitespace(&p);
 
-  while (cur < end) {
-    if (*cur == '#') {
-      while (cur < end && *cur != '\n') cur++;
-      if (cur < end) cur++;
+  while (!AtEnd(&p)) {
+    if (*p.cur == '#') {
+      while (!AtEnd(&p) && *p.cur != '\n') p.cur++;
+      if (!AtEnd(&p)) p.cur++;
       continue;
     }
-    stat.name = ParseName(&cur, end);
+    stat.name = ParseName(&p);
     stat.id = Hash(stat.name, strlen(stat.name));
-    SkipSpaces(cur, end);
-    if (cur == end || (*cur != '=' && *cur != ':')) {
+    SkipSpaces(&p);
+    if (AtEnd(&p) || (*p.cur != '=' && *p.cur != ':')) {
       fprintf(stderr, "Expected \"=\" or \":\" in stat definition \"%s\"\n", stat.name);
       exit(99);
     }
-    cur++;
-    SkipSpaces(cur, end);
-    if (cur == end) {
+    p.cur++;
+    SkipSpaces(&p);
+    if (AtEnd(&p)) {
       fprintf(stderr, "Expected expression in stat definition \"%s\"\n", stat.name);
       exit(99);
     }
     stat.deps = 0;
     stat.reverseDeps = 0;
-    stat.calc = ParseCalculation(&cur, end, &stat.deps);
+    stat.calc = ParseCalculation(&p, &stat.deps);
     if (!stat.calc) {
       fprintf(stderr, "Expected expression in stat definition \"%s\"\n", stat.name);
       exit(99);
@@ -180,7 +180,7 @@ StatInfo *ParseStatFile(FILE *f, u32 size)
 
     VecPush(stats, stat);
 
-    cur = SkipWhitespace(cur, end);
+    SkipWhitespace(&p);
   }
 
   free(data);

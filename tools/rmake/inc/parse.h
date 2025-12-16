@@ -10,10 +10,22 @@
 #define IsAlpha(c)      (IsUppercase(c) || IsLowercase(c))
 #define IsSymChar(c)    (IsDigit(c) || IsAlpha(c) || (c) == '_')
 
-#define SkipSpaces(cur, end) do {\
-  while ((cur) < (end) && IsSpace(*(cur))) (cur)++;\
+#define AtEnd(p)  ((p)->cur >= (p)->end)
+#define SkipSpaces(p) do {\
+  while ((p)->cur < (p)->end && IsSpace(*(p)->cur)) (p)->cur++;\
 } while(0)
 
+typedef struct {
+  char *cur;
+  char *end;
+  u32 line;
+} Parser;
+
 u32 Hash(void *data, u32 size);
-char *SkipWhitespace(char *cur, char *end);
-char *ParseName(char **cur, char *end);
+void SkipWhitespace(Parser *p);
+void SkipLine(Parser *p);
+void Expect(Parser *p, char *expected);
+char *ParseName(Parser *p);
+u32 ParseID(Parser *p);
+i32 ParseNum(Parser *p);
+u32 ParseString(Parser *p, char **strings);
