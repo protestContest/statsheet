@@ -8,7 +8,6 @@
 #include "lzss.h"
 #include "runlength.h"
 #include "pack_stats.h"
-#include "pack_strings.h"
 #include "util.h"
 
 /*
@@ -35,7 +34,6 @@ static PackMethod methods[] = {
   {"H", PackHuffman},
   {"R", PackRunLength},
   {"PackStats", PackStats},
-  {"PackStrings", PackStrings},
 };
 
 void Filter(u8 *data, u32 size, u32 dataSize)

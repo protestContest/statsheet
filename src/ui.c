@@ -94,7 +94,7 @@ void HideCursor(void)
 
 void PlaceCursor(i16 x, i16 y)
 {
-  PlaceObj(cursorObj, x-8, y-3);
+  PlaceObj(cursorObj, x-8, y-4);
 }
 
 void ShowArrows(Rect *bounds, VHSelect selectDir)

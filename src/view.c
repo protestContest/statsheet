@@ -12,6 +12,7 @@ void InitView(View *view, Rect *bounds, ViewDraw draw, ViewInput onInput, ViewAc
   view->draw = draw;
   view->onInput = onInput;
   view->activate = activate;
+  view->parent = 0;
 }
 
 void Run(View *view)

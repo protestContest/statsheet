@@ -9,7 +9,7 @@ void InitSkillsPage(Page *page)
 {
   i16 lineHeight = LineHeight();
   Rect bounds;
-  InitPage(page, "Overview");
+  InitPage(page, "Skills");
 
   SetRect(&bounds, 8, 15, SCREEN_W/2-4, 15+lineHeight);
   NumStatView *acrobatics = Alloc(sizeof(NumStatView));
@@ -56,61 +56,53 @@ void InitSkillsPage(Page *page)
   AddPageView(page, &investigation->asView);
   LinkViewBelow(page, &intimidation->asView, &investigation->asView);
 
-  SetRect(&bounds, SCREEN_W/2+8, 15, SCREEN_W-4, 15+lineHeight);
+  SetRect(&bounds, SCREEN_W/2+8, 15, SCREEN_W-8, 15+lineHeight);
   NumStatView *medicine = Alloc(sizeof(NumStatView));
   InitNumStatView(medicine, &bounds, "Medicine", "Medicine", "");
   AddPageView(page, &medicine->asView);
   LinkViewBeside(page, &acrobatics->asView, &medicine->asView);
-
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *nature = Alloc(sizeof(NumStatView));
   InitNumStatView(nature, &bounds, "Nature", "Nature", "");
   AddPageView(page, &nature->asView);
   LinkViewBelow(page, &medicine->asView, &nature->asView);
   LinkViewBeside(page, &animalhandling->asView, &nature->asView);
-
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *perception = Alloc(sizeof(NumStatView));
   InitNumStatView(perception, &bounds, "Perception", "Perception", "");
   AddPageView(page, &perception->asView);
   LinkViewBelow(page, &nature->asView, &perception->asView);
   LinkViewBeside(page, &arcana->asView, &perception->asView);
-
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *performance = Alloc(sizeof(NumStatView));
   InitNumStatView(performance, &bounds, "Performance", "Performance", "");
   AddPageView(page, &performance->asView);
   LinkViewBelow(page, &perception->asView, &performance->asView);
   LinkViewBeside(page, &athletics->asView, &performance->asView);
-
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *persuasion = Alloc(sizeof(NumStatView));
   InitNumStatView(persuasion, &bounds, "Persuasion", "Persuasion", "");
   AddPageView(page, &persuasion->asView);
   LinkViewBelow(page, &performance->asView, &persuasion->asView);
   LinkViewBeside(page, &deception->asView, &persuasion->asView);
-
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *religion = Alloc(sizeof(NumStatView));
   InitNumStatView(religion, &bounds, "Religion", "Religion", "");
   AddPageView(page, &religion->asView);
   LinkViewBelow(page, &persuasion->asView, &religion->asView);
   LinkViewBeside(page, &history->asView, &religion->asView);
-
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *sleightofhand = Alloc(sizeof(NumStatView));
   InitNumStatView(sleightofhand, &bounds, "SleightOfHand", "SleightOfHand", "");
   AddPageView(page, &sleightofhand->asView);
   LinkViewBelow(page, &religion->asView, &sleightofhand->asView);
   LinkViewBeside(page, &insight->asView, &sleightofhand->asView);
-
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *stealth = Alloc(sizeof(NumStatView));
   InitNumStatView(stealth, &bounds, "Stealth", "Stealth", "");
   AddPageView(page, &stealth->asView);
   LinkViewBelow(page, &sleightofhand->asView, &stealth->asView);
   LinkViewBeside(page, &intimidation->asView, &stealth->asView);
-
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *survival = Alloc(sizeof(NumStatView));
   InitNumStatView(survival, &bounds, "Survival", "Survival", "");

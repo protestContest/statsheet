@@ -13,6 +13,7 @@ typedef struct {
   View asView;
   char *title;
   PageElement *elements;
+  View **views;
   u32 selected;
 } Page;
 

@@ -138,7 +138,7 @@ void InitOverviewPage(Page *page)
   InitLabel(l, &bounds, "Spells");
   AddPageView(page, &l->asView);
 
-  SetRect(&bounds, SCREEN_W/2+8, 15+lineHeight+4, SCREEN_W-4, 15+2*lineHeight);
+  SetRect(&bounds, SCREEN_W/2+8, 15+lineHeight+4, SCREEN_W-8, 15+2*lineHeight);
   ChargeStatView *l1 = Alloc(sizeof(ChargeStatView));
   InitChargeStatView(l1, &bounds, "L1", "L1SlotsUsed", "L1Slots");
   AddPageView(page, &l1->asView);

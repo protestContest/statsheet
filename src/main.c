@@ -4,6 +4,8 @@
 #include "kit/text.h"
 #include "pages/overview_page.h"
 #include "pages/skills_page.h"
+#include "pages/spell_list.h"
+#include "spell.h"
 #include "stat.h"
 #include "ui.h"
 #include "views/page_list.h"
@@ -18,6 +20,7 @@ int main(void)
   SetFont("Geneva");
 
   InitStats();
+  InitSpells();
 
   PageList pages;
   InitPageList(&pages);
@@ -29,6 +32,10 @@ int main(void)
   Page skillsPage;
   InitSkillsPage(&skillsPage);
   AddPage(&pages, &skillsPage);
+
+  Page spellsPage;
+  InitSpellListPage(&spellsPage);
+  AddPage(&pages, &spellsPage);
 
   Run(&pages.asView);
 }

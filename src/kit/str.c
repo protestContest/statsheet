@@ -127,3 +127,12 @@ bool StrEq(char *s1, char *s2)
   }
   return *s1 == *s2;
 }
+
+i32 CompareStr(char *s1, char *s2)
+{
+  while (*s1 && *s2 && *s1 == *s2) {
+    s1++;
+    s2++;
+  }
+  return *s1 - *s2;
+}

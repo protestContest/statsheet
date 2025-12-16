@@ -1,6 +1,8 @@
 Level = 6
 
 MaxHP = ModCON 4 + Level * 2 + TmpMaxHP +
+TmpMaxHP = 0
+HP = 0
 NumHitDie = Level
 HitDieType = 6
 AC = 10 ModDEX + ArmorMod +
@@ -48,8 +50,8 @@ SleightOfHand = ModDEX
 Stealth = ModDEX
 Survival = ModWIS
 
-PrepCantrips = 3 Level 3 > + Level 9 > +
-PrepSpells = Level 3 + Level 4 > + Level 8 > + Level 11 > - Level 15 > +
+PreparedCantrips = 3 Level 3 > + Level 9 > +
+PreparedSpells = Level 3 + Level 4 > + Level 8 > + Level 11 > - Level 15 > +
 
 L1Slots = 2 Level 1 > + Level 2 > +
 L2Slots = 0 Level 2 > 2 * + Level 3 > +
@@ -61,8 +63,6 @@ L7Slots = 0 Level 12 > + Level 19 > +
 L8Slots = Level 14 >
 L9Slots = Level 16 >
 
-
-
 L1SlotsUsed = 4
 L2SlotsUsed = 0
 L3SlotsUsed = 0
@@ -70,7 +70,5 @@ L3SlotsUsed = 0
 InspirationUsed = 0
 InspirationMax = 1
 
-TmpMaxHP = 0
-HP = 0
 ArmorMod = 0
 

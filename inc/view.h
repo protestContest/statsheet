@@ -11,6 +11,7 @@ typedef struct View {
   ViewDraw draw;
   ViewInput onInput;
   ViewActivate activate;
+  struct View *parent;
 } View;
 #define InputView(v,i)    ((v)->onInput && (v)->onInput(v,i))
 #define DrawView(v)       ((v)->draw && ((v)->draw(v),0))

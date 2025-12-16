@@ -1,6 +1,5 @@
 #include "views/page.h"
 #include "kit/canvas.h"
-#include "kit/debug.h"
 #include "kit/input.h"
 #include "kit/text.h"
 #include "kit/vec.h"
@@ -13,6 +12,7 @@ void InitPage(Page *page, char *title)
   InitView(&page->asView, &bounds, PageDraw, PageInput, PageActivate);
   page->title = title;
   page->elements = 0;
+  page->views = 0;
   page->selected = 0;
 }
 
@@ -28,8 +28,8 @@ void PageDraw(View *view)
   MoveTo(SCREEN_W/2 - width/2, info.ascent);
   Print(page->title);
 
-  for (u32 i = 0; i < VecCount(page->elements); i++) {
-    DrawView(page->elements[i].view);
+  for (u32 i = 0; i < VecCount(page->views); i++) {
+    DrawView(page->views[i]);
   }
 }
 
@@ -48,7 +48,11 @@ bool PageInput(View *view, u16 input)
   } else if (KeyPressed(BTN_DOWN) && selected->bottom) {
     SelectView(page, selected->bottom);
   } else {
-    InputView(selected->view, input);
+    View *view = selected->view;
+    while (view) {
+      InputView(view, input);
+      view = view->parent;
+    }
   }
   return false;
 }
@@ -66,8 +70,7 @@ void PageActivate(View *view, bool active)
 
 void AddPageView(Page *page, View *view)
 {
-  PageElement el = {view, 0, 0, 0, 0};
-  VecPush(page->elements, el);
+  VecPush(page->views, view);
 }
 
 static PageElement *GetPageElement(Page *page, View *view)
@@ -75,8 +78,9 @@ static PageElement *GetPageElement(Page *page, View *view)
   for (u32 i = 0; i < VecCount(page->elements); i++) {
     if (page->elements[i].view == view) return &page->elements[i];
   }
-  Assert(false);
-  return 0;
+  PageElement el = {view, 0, 0, 0, 0};
+  VecPush(page->elements, el);
+  return &page->elements[VecCount(page->elements)-1];
 }
 
 void LinkViewUp(Page *page, View *view, View *up)
