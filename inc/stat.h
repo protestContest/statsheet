@@ -40,3 +40,5 @@ Stat *GetStat(char *name);
 Stat *GetStatByID(u32 id);
 
 void UpdateStat(Stat *stat, i32 value);
+
+void SaveStats(void);

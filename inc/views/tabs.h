@@ -13,3 +13,5 @@ typedef struct {
 
 void InitTabView(TabView *view, Rect *bounds);
 void AddTabView(TabView *tabs, u32 tabNum, View *view);
+void SelectTab(TabView *tabView, i32 tabNum);
+View *GetTabView(TabView *tabView, u32 viewNum);

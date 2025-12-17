@@ -1,13 +1,41 @@
 #include "views/page_list.h"
+#include "dice_check.h"
 #include "kit/canvas.h"
-#include "kit/debug.h"
 #include "kit/input.h"
-#include "kit/mem.h"
-#include "kit/res.h"
+#include "kit/text.h"
 #include "kit/vec.h"
+#include "prefix.h"
 #include "view.h"
+#include "save.h"
+#include "views/menu.h"
 
 static PageList pages;
+
+static void StartMenu(void)
+{
+  char *items[] = {
+    "Save",
+    "Dice Check"
+  };
+  Menu menu;
+  i16 w = 100;
+  i16 h = LineHeight()*ArrayCount(items) + 6;
+  Rect bounds = {SCREEN_W/2-w/2, SCREEN_H/2-h/2, SCREEN_W/2+w/2, SCREEN_H/2+h/2};
+
+  InitMenu(&menu, &bounds, items, ArrayCount(items));
+  Run(&menu.asView);
+
+  if (KeyPressed(BTN_A)) {
+    switch (menu.selected) {
+    case 0:
+      SaveState();
+      break;
+    case 1:
+      DiceCheck(d20, 0);
+      break;
+    }
+  }
+}
 
 static void PageListDraw(View *view)
 {
@@ -26,6 +54,8 @@ static bool PageListInput(View *view, u16 input)
     SelectPage(list->curPage > 0 ? list->curPage - 1 : VecCount(list->pages) - 1);
   } else if (VecCount(list->pages) > 1 && KeyPressed(BTN_R)) {
     SelectPage(list->curPage < VecCount(list->pages)-1 ? list->curPage + 1 : 0);
+  } else if (KeyPressed(BTN_START)) {
+    StartMenu();
   } else {
     InputView(&page->asView, input);
   }

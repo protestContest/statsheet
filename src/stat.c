@@ -1,5 +1,6 @@
 #include "stat.h"
 #include "kit/debug.h"
+#include "kit/hardware.h"
 #include "kit/hashmap.h"
 #include "kit/math.h"
 #include "kit/mem.h"
@@ -8,6 +9,11 @@
 #include "kit/str.h"
 #include "kit/vec.h"
 #include "prefix.h"
+
+typedef struct {
+  u32 id;
+  i32 value;
+} SavedStat;
 
 static HashMap statMap = EmptyHashMap;
 static Stat *statList = 0;
@@ -212,6 +218,17 @@ void CalcStat(Stat *stat)
   stat->value = stack[0];
 }
 
+static SavedStat *GetSavedStat(u32 id, u32 numStats)
+{
+  SavedStat *saved = (SavedStat*)SAVE_DATA;
+  for (u32 i = 0; i < numStats; i++) {
+    if (saved[i].id == id) {
+      return &saved[i];
+    }
+  }
+  return 0;
+}
+
 void InitStats(void)
 {
   u8 *statData = ResData(GetResource("Stats"));
@@ -241,7 +258,12 @@ void InitStats(void)
 
   for (u32 i = 0; i < numStats; i++) {
     Stat *stat = &statList[i];
-    CalcStat(stat);
+    SavedStat *saved = GetSavedStat(stat->id, numStats);
+    if (saved) {
+      stat->value = saved->value;
+    } else {
+      CalcStat(stat);
+    }
   }
 }
 
@@ -309,4 +331,14 @@ void UpdateStat(Stat *stat, i32 value)
   if (stat->value == value) return;
   stat->value = value;
   StatUpdated(stat);
+}
+
+void SaveStats(void)
+{
+  SavedStat *cur = (SavedStat*)SAVE_DATA;
+  for (u32 i = 0; i < VecCount(statList); i++) {
+    cur->id = statList[i].id;
+    cur->value = statList[i].value;
+    cur++;
+  }
 }

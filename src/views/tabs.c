@@ -15,14 +15,10 @@ static void DrawTabView(View *view)
 static bool TabViewInput(View *view, u16 input)
 {
   TabView *tabView = (TabView*)view;
-  if (KeyPressed(BTN_LEFT) && tabView->selectedTab > 0) {
-    tabView->selectedTab--;
-    EraseRect(&view->bounds);
-    DrawTabView(view);
-  } else if (KeyPressed(BTN_RIGHT) && tabView->selectedTab < VecCount(tabView->tabs)-1) {
-    tabView->selectedTab++;
-    EraseRect(&view->bounds);
-    DrawTabView(view);
+  if (KeyPressed(BTN_LEFT)) {
+    SelectTab(tabView, tabView->selectedTab-1);
+  } else if (KeyPressed(BTN_RIGHT)) {
+    SelectTab(tabView, tabView->selectedTab+1);
   }
   return false;
 }
@@ -42,6 +38,19 @@ void AddTabView(TabView *tabView, u32 tabNum, View *view)
     TabContent content = {0};
     VecPush(tabView->tabs, content);
   }
-  view->parent = &tabView->asView;
+
   VecPush(tabView->tabs[tabNum].content, view);
+}
+
+void SelectTab(TabView *tabView, i32 tabNum)
+{
+  if (tabNum < 0 || tabNum >= (i32)VecCount(tabView->tabs)) return;
+  tabView->selectedTab = tabNum;
+  EraseRect(&tabView->asView.bounds);
+  DrawTabView(&tabView->asView);
+}
+
+View *GetTabView(TabView *tabView, u32 viewNum)
+{
+  return tabView->tabs[tabView->selectedTab].content[viewNum];
 }

@@ -48,11 +48,7 @@ bool PageInput(View *view, u16 input)
   } else if (KeyPressed(BTN_DOWN) && selected->bottom) {
     SelectView(page, selected->bottom);
   } else {
-    View *view = selected->view;
-    while (view) {
-      InputView(view, input);
-      view = view->parent;
-    }
+    InputView(selected->view, input);
   }
   return false;
 }
