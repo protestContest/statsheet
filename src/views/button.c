@@ -33,27 +33,33 @@ static void DrawButtonUp(Rect *bounds)
 static void DrawButtonDown(Rect *bounds)
 {
   Rect r = *bounds;
-  SetColor(RGB(48, 48, 48));
+  InsetRect(&r, 2, 2);
+  FillRect(&r, RGB(90,90,90));
+  InsetRect(&r, -2, -2);
+
+  SetColor(BLACK);
   MoveTo(r.left, r.bottom-3);
   LineTo(r.left, r.top+2);
   LineTo(r.left+2, r.top);
   LineTo(r.right-3, r.top);
-  LineTo(r.right-1, r.top+2);
-  LineTo(r.right-1, r.bottom-2);
-  LineTo(r.right-3, r.bottom-1);
-  LineTo(r.left+2, r.bottom-1);
-  SetColor(BLACK);
+
+  SetColor(RGB(48,48,48));
   MoveTo(r.left+1, r.bottom-2);
   LineTo(r.left+1, r.top+2);
+  LineTo(r.left+2, r.top+2);
   LineTo(r.left+2, r.top+1);
-  LineTo(r.right-3, r.top+1);
-  SetColor(RGB(128, 128, 128));
+  LineTo(r.right-2, r.top+1);
+  LineTo(r.right-1, r.top+2);
+  LineTo(r.right-1, r.bottom-3);
+  LineTo(r.right-3, r.bottom-1);
+  LineTo(r.left+2, r.bottom-1);
+  LineTo(r.left+2, r.bottom-2);
+
+  SetColor(RGB(128,128,128));
   MoveTo(r.right-2, r.top+2);
   LineTo(r.right-2, r.bottom-3);
   LineTo(r.right-3, r.bottom-2);
-  LineTo(r.left+2, r.bottom-2);
-  InsetRect(&r, 2, 2);
-  FillRect(&r, RGB(90, 90, 90));
+  LineTo(r.left+3, r.bottom-2);
 }
 
 static void DrawButton(View *el)
@@ -88,7 +94,7 @@ static bool ButtonInput(View *el, u16 input)
 
 void InitButton(Button *button, Rect *bounds, char *title)
 {
-  InitView(&button->asView, bounds, DrawButton, ButtonInput, 0);
+  InitView(&button->asView, bounds, DrawButton, ButtonInput, 0, 0);
   button->title = title;
   button->active = false;
 }

@@ -37,7 +37,7 @@ static bool TabViewInput(View *view, u16 input)
 
 void InitTabView(TabView *view, Rect *bounds)
 {
-  InitView(&view->asView, bounds, DrawTabView, TabViewInput, 0);
+  InitView(&view->asView, bounds, DrawTabView, TabViewInput, 0, 0);
   view->tabs = 0;
   TabContent content = {0};
   VecPush(view->tabs, content);

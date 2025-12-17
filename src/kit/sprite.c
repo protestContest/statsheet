@@ -149,21 +149,6 @@ void SetTiles(TGA *tga)
 {
   Rect r = {0, 0, tga->width, tga->height};
   LoadTiles(tga, &r, 512);
-  // u32 width = tga->width;
-
-  // u8 *pixels = ((u8*)tga->data) + tga->paletteSize*tga->paletteDepth/8;
-  // u32 *tileWords = (u32*)CRAM;
-  // for (u32 tile = 0; tile < 32*16; tile++) {
-  //   for (u32 tileRow = 0; tileRow < 8; tileRow++) {
-  //     u8 *row = pixels + tile/32*width*8 + tileRow*width + (tile%32)*8;
-  //     u32 word = 0;
-  //     for (u32 i = 0; i < 8; i++) {
-  //       word |= row[i] << 4*i;
-  //     }
-
-  //     tileWords[tile*8 + tileRow] = word;
-  //   }
-  // }
 }
 
 static void SetSpriteFlip(u32 obj, AnimatedSprite *sprite)

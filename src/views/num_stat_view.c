@@ -58,7 +58,7 @@ static void NumStatViewActivate(View *view, bool active)
 
 void InitNumStatView(NumStatView *view, Rect *bounds, char *title, char *statName, char *editStatName)
 {
-  InitView(&view->asView, bounds, DrawNumStatView, InputNumStatView, NumStatViewActivate);
+  InitView(&view->asView, bounds, DrawNumStatView, InputNumStatView, NumStatViewActivate, 0);
 
   Rect childBounds = *bounds;
   childBounds.right = childBounds.left + TextWidth(title);

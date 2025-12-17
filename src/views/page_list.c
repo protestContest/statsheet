@@ -73,7 +73,7 @@ static void PageListActivate(View *view, bool active)
 void InitPageList(void)
 {
   Rect bounds = {0, 0, SCREEN_W, SCREEN_H};
-  InitView(&pages.asView, &bounds, PageListDraw, PageListInput, PageListActivate);
+  InitView(&pages.asView, &bounds, PageListDraw, PageListInput, PageListActivate, 0);
   pages.pages = 0;
   pages.curPage = 0;
 }

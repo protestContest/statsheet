@@ -6,12 +6,13 @@
 
 static View **runStack = 0;
 
-void InitView(View *view, Rect *bounds, ViewDraw draw, ViewInput onInput, ViewActivate activate)
+void InitView(View *view, Rect *bounds, ViewDraw draw, ViewInput onInput, ViewActivate activate, ViewDestroy destroy)
 {
   view->bounds = *bounds;
   view->draw = draw;
   view->onInput = onInput;
   view->activate = activate;
+  view->destroy = destroy;
 }
 
 void Run(View *view)

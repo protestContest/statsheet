@@ -13,6 +13,6 @@ static void DrawLabel(View *view)
 
 void InitLabel(Label *label, Rect *bounds, char *title)
 {
-  InitView(&label->asView, bounds, DrawLabel, 0, 0);
+  InitView(&label->asView, bounds, DrawLabel, 0, 0, 0);
   label->title = title;
 }

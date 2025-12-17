@@ -116,6 +116,36 @@ void ShowArrows(Rect *bounds, VHSelect selectDir)
   }
 }
 
+void ShowUpArrow(i16 x, i16 y)
+{
+  PlaceObj(arrowUpObj, x-4, y);
+  ShowObj(arrowUpObj);
+}
+
+void ShowDownArrow(i16 x, i16 y)
+{
+  PlaceObj(arrowDownObj, x-4, y);
+  ShowObj(arrowDownObj);
+}
+
+void HideArrow(Direction arrow)
+{
+  switch (arrow) {
+  case dirUp:
+    HideObj(arrowUpObj);
+    break;
+  case dirDown:
+    HideObj(arrowDownObj);
+    break;
+  case dirLeft:
+    HideObj(arrowLeftObj);
+    break;
+  case dirRight:
+    HideObj(arrowRightObj);
+    break;
+  }
+}
+
 void HideArrows(void)
 {
   HideObj(arrowUpObj);
@@ -130,125 +160,3 @@ void HideAllObjs(void)
     HideObj(i);
   }
 }
-
-
-
-// void DrawCharges(i32 used, i32 max, Rect *bounds)
-// {
-//   Rect r = *bounds;
-//   r.bottom = r.top + 10;
-//   SetColor(BLACK);
-//   FrameRect(&r);
-//   for (i32 i = 1; i < max; i++) {
-//     MoveTo(r.left + 9*i, r.top);
-//     Line(0, 9);
-//   }
-//   r.left += 2;
-//   r.top += 2;
-//   r.bottom = r.top + 6;
-//   r.right = r.left + 6;
-//   for (i32 i = 0; i < used; i++) {
-//     FillRect(&r, BLACK);
-//     OffsetRect(&r, 9, 0);
-//   }
-// }
-
-// i32 NumInput(i32 num, u16 input, Rect *bounds, bool showSign, bool selectDir)
-// {
-//   FontInfo info;
-//   GetFontInfo(&info);
-//   i16 x = bounds->right-1;
-//   i16 y = bounds->top+1+info.ascent;
-//   if ((selectDir && KeyPressed(BTN_LEFT)) || (!selectDir && KeyPressed(BTN_DOWN))) {
-//     num--;
-//   } else if ((selectDir && KeyPressed(BTN_RIGHT)) || (!selectDir && KeyPressed(BTN_UP))) {
-//     num++;
-//   }
-//   u16 changeMask = selectDir ? (BTN_LEFT|BTN_RIGHT) : (BTN_UP|BTN_DOWN);
-//   if (input & changeMask) {
-//     EraseRect(bounds);
-//     DrawNum(num, x, y, showSign);
-//   }
-//   return num;
-// }
-
-// i32 EditNum(i32 num, Rect *bounds, bool showSign, bool selectDir)
-// {
-//   i32 original = num;
-//   FontInfo info;
-//   GetFontInfo(&info);
-//   SetColor(BLACK);
-//   InsetRect(bounds, -2, -2);
-//   FrameRect(bounds);
-//   InsetRect(bounds, 1, 1);
-
-//   i16 x = bounds->right-1;
-//   i16 y = bounds->top+1+info.ascent;
-
-//   EraseRect(bounds);
-//   DrawNum(num, x, y, showSign);
-
-//   ShowArrows(bounds, selectDir);
-
-//   while (true) {
-//     VSync();
-//     u16 input = GetInput();
-//     if (KeyPressed(BTN_A)) {
-//       break;
-//     } else if (KeyPressed(BTN_B) || KeyPressed(BTN_SELECT)) {
-//       num = original;
-//       break;
-//     } else {
-//       num = NumInput(num, input, bounds, showSign, selectDir);
-//     }
-//   }
-
-//   HideArrows();
-//   InsetRect(bounds, -1, -1);
-//   EraseRect(bounds);
-//   DrawNum(num, x, y, showSign);
-//   return num;
-// }
-
-// i32 EditCharges(i32 used, i32 max, Rect *bounds)
-// {
-//   i32 original = used;
-//   FontInfo info;
-//   GetFontInfo(&info);
-//   SetColor(BLACK);
-//   InsetRect(bounds, -1, -1);
-//   ShowArrows(bounds, true);
-//   InsetRect(bounds, -1, -1);
-//   FrameRect(bounds);
-//   InsetRect(bounds, 2, 2);
-
-
-//   while (true) {
-//     VSync();
-//     u16 input = GetInput();
-//     if (KeyPressed(BTN_A)) {
-//       break;
-//     } else if (KeyPressed(BTN_B) || KeyPressed(BTN_SELECT)) {
-//       used = original;
-//       break;
-//     } else if (KeyPressed(BTN_LEFT) && used > 0) {
-//       used--;
-//     } else if (KeyPressed(BTN_RIGHT) && used < max) {
-//       used++;
-//     }
-//     if (input & (BTN_LEFT | BTN_RIGHT)) {
-//       EraseRect(bounds);
-//       DrawCharges(used, max, bounds);
-//     }
-//   }
-
-//   HideArrows();
-
-//   InsetRect(bounds, -2, -2);
-//   EraseRect(bounds);
-//   InsetRect(bounds, 2, 2);
-//   DrawCharges(used, max, bounds);
-
-//   return used;
-// }
-

@@ -62,7 +62,7 @@ static void ActivateNumControl(View *view, bool active)
 
 void InitNumControl(NumControl *ctl, Rect *bounds, i32 value, bool selectDir, bool showSign)
 {
-  InitView(&ctl->asView, bounds, DrawNumControl, InputNumControl, ActivateNumControl);
+  InitView(&ctl->asView, bounds, DrawNumControl, InputNumControl, ActivateNumControl, 0);
   ctl->value = value;
   ctl->selectDir = selectDir;
   ctl->showSign = showSign;

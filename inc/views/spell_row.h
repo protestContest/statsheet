@@ -5,7 +5,8 @@
 typedef struct {
   View asView;
   Spell *spell;
+  bool highligted;
 } SpellRowView;
 
-void InitSpellRow(SpellRowView *spellRow, Rect *bounds, char *spellName);
+void InitSpellRow(SpellRowView *spellRow, Rect *bounds, Spell *spell);
 

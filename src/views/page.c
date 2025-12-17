@@ -9,7 +9,7 @@
 void InitPage(Page *page, char *title)
 {
   Rect bounds = {0, 0, SCREEN_W, SCREEN_H};
-  InitView(&page->asView, &bounds, PageDraw, PageInput, PageActivate);
+  InitView(&page->asView, &bounds, PageDraw, PageInput, PageActivate, 0);
   page->title = title;
   page->elements = 0;
   page->views = 0;

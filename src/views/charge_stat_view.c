@@ -39,7 +39,7 @@ void InitChargeStatView(ChargeStatView *view, Rect *bounds, char *title, char *s
 {
   FontInfo info;
   GetFontInfo(&info);
-  InitView(&view->asView, bounds, DrawChargeStatView, InputChargeStatView, 0);
+  InitView(&view->asView, bounds, DrawChargeStatView, InputChargeStatView, 0, 0);
   view->stat = GetStat(statName);
   view->maxStat = GetStat(maxStatName);
   Rect ctlBounds = {bounds->right - 9*view->maxStat->value - 1, bounds->top + info.ascent - 8, bounds->right, bounds->top + info.ascent + 2};

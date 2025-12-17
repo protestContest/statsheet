@@ -105,7 +105,7 @@ static void DiceCheckViewActivate(View *view, bool active)
 void InitDiceCheckView(DiceCheckView *view, Rect *bounds, char *title, u32 die, i32 mod)
 {
   i16 lineHeight = LineHeight();
-  InitView(&view->asView, bounds, DrawDiceCheck, InputDiceCheck, DiceCheckViewActivate);
+  InitView(&view->asView, bounds, DrawDiceCheck, InputDiceCheck, DiceCheckViewActivate, 0);
   view->title = title;
   view->selected = &view->dice.asView;
   view->rolled = false;

@@ -53,7 +53,7 @@ static void ActivateMenu(View *view, bool active)
 
 void InitMenu(Menu *menu, Rect *bounds, char **options, u32 numOptions)
 {
-  InitView(&menu->asView, bounds, DrawMenu, InputMenu, ActivateMenu);
+  InitView(&menu->asView, bounds, DrawMenu, InputMenu, ActivateMenu, 0);
   menu->numOptions = numOptions;
   menu->options = options;
   menu->selected = 0;

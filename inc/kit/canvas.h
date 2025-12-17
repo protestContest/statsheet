@@ -2,6 +2,7 @@
 #include "hardware.h"
 
 typedef enum {dirV, dirH} VHSelect;
+typedef enum {dirUp, dirDown, dirLeft, dirRight} Direction;
 
 typedef struct {
   i16 v;

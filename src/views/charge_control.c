@@ -55,7 +55,7 @@ static void ActivateChargeControl(View *view, bool active)
 
 void InitChargeControl(ChargeControl *ctl, Rect *bounds, i32 value, i32 max)
 {
-  InitView(&ctl->asView, bounds, DrawChargeControl, InputChargeControl, ActivateChargeControl);
+  InitView(&ctl->asView, bounds, DrawChargeControl, InputChargeControl, ActivateChargeControl, 0);
   ctl->value = value;
   ctl->max = max;
 }

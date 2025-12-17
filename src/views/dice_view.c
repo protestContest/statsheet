@@ -80,7 +80,7 @@ void InitDiceView(DiceView *view, Rect *bounds, u32 die, VHSelect selectDir)
 {
   InitSprite(&diceSprite,    Obj64x64, 3, ArrayCount(diceFrames), diceFrames);
 
-  InitView(&view->asView, bounds, DrawDiceView, DiceViewInput, 0);
+  InitView(&view->asView, bounds, DrawDiceView, DiceViewInput, 0, 0);
   view->curDie = die;
   view->selectDir = selectDir;
   HideObj(diceObj);

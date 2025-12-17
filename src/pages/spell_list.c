@@ -17,6 +17,7 @@ static void ShowSpell(Spell *spell)
   Rect bounds = {SCREEN_W/2 - w/2, SCREEN_H/2 - h/2, SCREEN_W/2 + w/2, SCREEN_H/2+h/2};
   InitSpellDetailView(&detail, &bounds, spell);
   Run(&detail.asView);
+  DestroyView(&detail.asView);
 }
 
 static bool PageViewInput(View *view, u16 input)
@@ -57,7 +58,7 @@ void InitSpellListPage(Page *page)
   for (u32 i = 0; i < NumSpells(); i++) {
     Spell *spell = GetIndSpell(i);
     SpellRowView *row = Alloc(sizeof(SpellRowView));
-    InitSpellRow(row, &bounds, spell->name);
+    InitSpellRow(row, &bounds, spell);
     AddTabView(tabView, tabNum, &row->asView);
 
     if (lastView) {
