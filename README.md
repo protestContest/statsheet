@@ -1,5 +1,8 @@
 # Statsheet
 
+![Screenshot 1](https://github.com/protestContest/statsheet/blob/main/support/statsheet-0.png?raw=true)
+![Screenshot 2](https://github.com/protestContest/statsheet/blob/main/support/statsheet-1.png?raw=true)
+
 A D&D 5e character sheet app for the Game Boy Advance.
 
 The "game" consists of a collection of screens:

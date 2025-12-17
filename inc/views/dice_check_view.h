@@ -6,6 +6,7 @@
 
 typedef struct {
   View asView;
+  char *title;
   View *selected;
   bool rolled;
   i32 result;
@@ -14,4 +15,4 @@ typedef struct {
   Button btn;
 } DiceCheckView;
 
-void InitDiceCheckView(DiceCheckView *view, Rect *bounds, u32 die, i32 mod);
+void InitDiceCheckView(DiceCheckView *view, Rect *bounds, char *title, u32 die, i32 mod);

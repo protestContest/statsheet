@@ -31,7 +31,7 @@ static void StartMenu(void)
       SaveState();
       break;
     case 1:
-      DiceCheck(d20, 0);
+      DiceCheck("Dice Check", d20, 0);
       break;
     }
   }

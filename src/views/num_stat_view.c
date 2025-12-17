@@ -35,7 +35,7 @@ static bool InputNumStatView(View *view, u16 input)
     EraseRect(&statView->control.asView.bounds);
     DrawView(&statView->asView);
   } else if (KeyPressed(BTN_A)) {
-    StatDiceCheck(statView->stat);
+    StatDiceCheck(statView->label.title, statView->stat);
   }
   return false;
 }

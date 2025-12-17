@@ -15,7 +15,7 @@ static void DrawResult(DiceCheckView *dcView)
   i16 cx = (dcView->asView.bounds.right+dcView->asView.bounds.left)/2;
   i16 cy = (dcView->asView.bounds.bottom+dcView->asView.bounds.top)/2;
 
-  Rect resultRect = {cx, dcView->asView.bounds.top + 3, dcView->asView.bounds.right-3, dcView->btn.asView.bounds.top};
+  Rect resultRect = {cx, dcView->asView.bounds.top + 3 + LineHeight(), dcView->asView.bounds.right-3, dcView->btn.asView.bounds.top};
   EraseRect(&resultRect);
 
   char *natLabel = dcView->result == 20 ? "NAT 20" : dcView->result == 1 ? "NAT 1" : 0;
@@ -46,7 +46,11 @@ static void DrawDiceCheck(View *view)
   DrawView(&dcView->btn.asView);
   ShowArrows(&dcView->selected->bounds, dirV);
 
+  i16 cx = (view->bounds.right+view->bounds.left)/2;
+  MoveTo(cx - TextWidth(dcView->title)/2, view->bounds.top+3+LineHeight());
   SetColor(BLACK);
+  Print(dcView->title);
+
   Rect numBounds = dcView->modCtl.asView.bounds;
   InsetRect(&numBounds, -1, -1);
   FrameRect(&numBounds);
@@ -98,10 +102,11 @@ static void DiceCheckViewActivate(View *view, bool active)
   }
 }
 
-void InitDiceCheckView(DiceCheckView *view, Rect *bounds, u32 die, i32 mod)
+void InitDiceCheckView(DiceCheckView *view, Rect *bounds, char *title, u32 die, i32 mod)
 {
   i16 lineHeight = LineHeight();
   InitView(&view->asView, bounds, DrawDiceCheck, InputDiceCheck, DiceCheckViewActivate);
+  view->title = title;
   view->selected = &view->dice.asView;
   view->rolled = false;
   view->result = 0;
