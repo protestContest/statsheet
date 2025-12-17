@@ -14,8 +14,8 @@ static PageList pages;
 static void StartMenu(void)
 {
   char *items[] = {
+    "Dice Check",
     "Save",
-    "Dice Check"
   };
   Menu menu;
   i16 w = 100;
@@ -28,10 +28,10 @@ static void StartMenu(void)
   if (KeyPressed(BTN_A)) {
     switch (menu.selected) {
     case 0:
-      SaveState();
+      DiceCheck("Dice Check", d20, 0);
       break;
     case 1:
-      DiceCheck("Dice Check", d20, 0);
+      SaveState();
       break;
     }
   }

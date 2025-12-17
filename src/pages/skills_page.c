@@ -18,7 +18,7 @@ void InitSkillsPage(Page *page)
   AddPageView(page, &acrobatics->asView);
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *animalhandling = Alloc(sizeof(NumStatView));
-  InitNumStatView(animalhandling, &bounds, "AnimalHandling", "AnimalHandling", "");
+  InitNumStatView(animalhandling, &bounds, "Animal Handling", "AnimalHandling", "");
   animalhandling->control.showSign = true;
   AddPageView(page, &animalhandling->asView);
   LinkViewBelow(page, &acrobatics->asView, &animalhandling->asView);
@@ -108,7 +108,7 @@ void InitSkillsPage(Page *page)
   LinkViewBeside(page, &history->asView, &religion->asView);
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *sleightofhand = Alloc(sizeof(NumStatView));
-  InitNumStatView(sleightofhand, &bounds, "SleightOfHand", "SleightOfHand", "");
+  InitNumStatView(sleightofhand, &bounds, "Sleight Of Hand", "SleightOfHand", "");
   sleightofhand->control.showSign = true;
   AddPageView(page, &sleightofhand->asView);
   LinkViewBelow(page, &religion->asView, &sleightofhand->asView);

@@ -1,4 +1,4 @@
-#include "views/tabs.h"
+#include "views/tab_view.h"
 #include "kit/canvas.h"
 #include "kit/input.h"
 #include "kit/vec.h"
@@ -9,6 +9,18 @@ static void DrawTabView(View *view)
   TabContent *tab = &tabView->tabs[tabView->selectedTab];
   for (u32 i = 0; i < VecCount(tab->content); i++) {
     DrawView(tab->content[i]);
+  }
+
+  i16 indWidth = (VecCount(tabView->tabs)-1)*10 + 3;
+  Rect indRect = {SCREEN_W/2 - indWidth/2, SCREEN_H - 7, SCREEN_W/2 - indWidth/2+3, SCREEN_H - 4};
+  SetColor(BLACK);
+  for (u32 i = 0; i < VecCount(tabView->tabs); i++) {
+    if (i == tabView->selectedTab) {
+      FillRect(&indRect, BLACK);
+    } else {
+      FrameRect(&indRect);
+    }
+    OffsetRect(&indRect, 10, 0);
   }
 }
 

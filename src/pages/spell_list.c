@@ -5,8 +5,19 @@
 #include "kit/text.h"
 #include "views/page.h"
 #include "spell.h"
+#include "views/spell_detail_view.h"
 #include "views/spell_row.h"
-#include "views/tabs.h"
+#include "views/tab_view.h"
+
+static void ShowSpell(Spell *spell)
+{
+  SpellDetailView detail;
+  i16 w = 230;
+  i16 h = 150;
+  Rect bounds = {SCREEN_W/2 - w/2, SCREEN_H/2 - h/2, SCREEN_W/2 + w/2, SCREEN_H/2+h/2};
+  InitSpellDetailView(&detail, &bounds, spell);
+  Run(&detail.asView);
+}
 
 static bool PageViewInput(View *view, u16 input)
 {
@@ -19,6 +30,9 @@ static bool PageViewInput(View *view, u16 input)
   } else if (KeyPressed(BTN_RIGHT)) {
     SelectTab(tabView, tabView->selectedTab+1);
     SelectView(page, GetTabView(tabView, 0));
+  } else if (KeyPressed(BTN_A)) {
+    SpellRowView *row = (SpellRowView*)page->elements[page->selected].view;
+    ShowSpell(row->spell);
   }
   return false;
 }
@@ -57,6 +71,7 @@ void InitSpellListPage(Page *page)
     if (bounds.bottom > SCREEN_H - 8) {
       tabNum++;
       SetRect(&bounds, 8, 15, SCREEN_W-8, 15+lineHeight);
+      lastView = 0;
     }
   }
 }

@@ -43,7 +43,6 @@ static i16 DoChar(char c, FontRec *rec, bool draw)
   loc_table = bit_image + rec->row_words*rec->rect_height;
   ow_table = &rec->owt_offset + rec->owt_offset;
 
-
   u8 offset, width;
   i16 loc, img_width, index, first_word, last_word, leading_bits, trailing_bits;
 

@@ -154,5 +154,3 @@ SECTIONS
   __HEAP_END__    = ORIGIN(EWRAM) + LENGTH(EWRAM);
   __HEAP_SIZE__   = __HEAP_END__ - __HEAP_START__;
 }
-
-
