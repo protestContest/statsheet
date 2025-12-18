@@ -19,3 +19,4 @@ u16 GetInput(void);
 
 bool KeyPressed(u16 btn);
 bool KeyReleased(u16 btn);
+bool AutoKey(u16 btn);

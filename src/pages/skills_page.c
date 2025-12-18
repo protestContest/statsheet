@@ -128,5 +128,51 @@ void InitSkillsPage(Page *page)
   LinkViewBelow(page, &stealth->asView, &survival->asView);
   LinkViewBeside(page, &investigation->asView, &survival->asView);
 
+  SetRect(&bounds, 8, SCREEN_H - lineHeight*2 - 4, 64, SCREEN_H - lineHeight - 4);
+  NumStatView *str = Alloc(sizeof(NumStatView));
+  InitNumStatView(str, &bounds, "STR", "ModSTR", 0);
+  str->control.showSign = true;
+  AddPageView(page, &str->asView);
+  LinkViewBelow(page, &investigation->asView, &str->asView);
+
+  OffsetRect(&bounds, 0, lineHeight);
+  NumStatView *dex = Alloc(sizeof(NumStatView));
+  InitNumStatView(dex, &bounds, "DEX", "ModDEX", 0);
+  dex->control.showSign = true;
+  AddPageView(page, &dex->asView);
+  LinkViewBelow(page, &str->asView, &dex->asView);
+
+  OffsetRect(&bounds, 84, -lineHeight);
+  NumStatView *con = Alloc(sizeof(NumStatView));
+  InitNumStatView(con, &bounds, "CON", "ModCON", 0);
+  con->control.showSign = true;
+  AddPageView(page, &con->asView);
+  LinkViewBeside(page, &str->asView, &con->asView);
+  LinkViewUp(page, &con->asView, &investigation->asView);
+
+  OffsetRect(&bounds, 0, lineHeight);
+  NumStatView *intl = Alloc(sizeof(NumStatView));
+  InitNumStatView(intl, &bounds, "INT", "ModINT", 0);
+  intl->control.showSign = true;
+  AddPageView(page, &intl->asView);
+  LinkViewBelow(page, &con->asView, &intl->asView);
+  LinkViewBeside(page, &dex->asView, &intl->asView);
+
+  OffsetRect(&bounds, 84, -lineHeight);
+  NumStatView *wis = Alloc(sizeof(NumStatView));
+  InitNumStatView(wis, &bounds, "WIS", "ModWIS", 0);
+  wis->control.showSign = true;
+  AddPageView(page, &wis->asView);
+  LinkViewBeside(page, &con->asView, &wis->asView);
+  LinkViewBelow(page, &survival->asView, &wis->asView);
+
+  OffsetRect(&bounds, 0, lineHeight);
+  NumStatView *cha = Alloc(sizeof(NumStatView));
+  InitNumStatView(cha, &bounds, "CHA", "ModCHA", 0);
+  cha->control.showSign = true;
+  AddPageView(page, &cha->asView);
+  LinkViewBelow(page, &wis->asView, &cha->asView);
+  LinkViewBeside(page, &intl->asView, &cha->asView);
+
   SelectView(page, &acrobatics->asView);
 }

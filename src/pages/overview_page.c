@@ -46,89 +46,88 @@ void InitOverviewPage(Page *page)
   AddPageView(page, &spellSave->asView);
   LinkViewBelow(page, &speed->asView, &spellSave->asView);
 
-  bounds.right -= 30;
   OffsetRect(&bounds, 0, lineHeight + 8);
   NumStatView *str = Alloc(sizeof(NumStatView));
-  InitNumStatView(str, &bounds, "STR", "STR", 0);
+  InitNumStatView(str, &bounds, "STR", "ModSTR", 0);
+  str->control.showSign = true;
   AddPageView(page, &str->asView);
   LinkViewBelow(page, &spellSave->asView, &str->asView);
 
   Rect modBounds = bounds;
-  modBounds.right += 30;
+  modBounds.right -= 30;
   modBounds.left = modBounds.right - TextWidth("+00");
   NumStatView *strMod = Alloc(sizeof(NumStatView));
-  InitNumStatView(strMod, &modBounds, "", "ModSTR", 0);
-  strMod->control.showSign = true;
+  InitNumStatView(strMod, &modBounds, "", "STR", 0);
   AddPageView(page, &strMod->asView);
   LinkViewBeside(page, &str->asView, &strMod->asView);
   LinkViewUp(page, &strMod->asView, &spellSave->asView);
 
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *dex = Alloc(sizeof(NumStatView));
-  InitNumStatView(dex, &bounds, "DEX", "DEX", 0);
+  InitNumStatView(dex, &bounds, "DEX", "ModDEX", 0);
+  dex->control.showSign = true;
   AddPageView(page, &dex->asView);
   LinkViewBelow(page, &str->asView, &dex->asView);
 
   OffsetRect(&modBounds, 0, lineHeight);
   NumStatView *dexMod = Alloc(sizeof(NumStatView));
-  InitNumStatView(dexMod, &modBounds, "", "ModDEX", 0);
-  dexMod->control.showSign = true;
+  InitNumStatView(dexMod, &modBounds, "", "DEX", 0);
   AddPageView(page, &dexMod->asView);
   LinkViewBelow(page, &strMod->asView, &dexMod->asView);
   LinkViewBeside(page, &dex->asView, &dexMod->asView);
 
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *con = Alloc(sizeof(NumStatView));
-  InitNumStatView(con, &bounds, "CON", "CON", 0);
+  InitNumStatView(con, &bounds, "CON", "ModCON", 0);
+  con->control.showSign = true;
   AddPageView(page, &con->asView);
   LinkViewBelow(page, &dex->asView, &con->asView);
 
   OffsetRect(&modBounds, 0, lineHeight);
   NumStatView *conMod = Alloc(sizeof(NumStatView));
-  InitNumStatView(conMod, &modBounds, "", "ModCON", 0);
-  conMod->control.showSign = true;
+  InitNumStatView(conMod, &modBounds, "", "CON", 0);
   AddPageView(page, &conMod->asView);
   LinkViewBelow(page, &dexMod->asView, &conMod->asView);
   LinkViewBeside(page, &con->asView, &conMod->asView);
 
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *intl = Alloc(sizeof(NumStatView));
-  InitNumStatView(intl, &bounds, "INT", "INT", 0);
+  InitNumStatView(intl, &bounds, "INT", "ModINT", 0);
+  intl->control.showSign = true;
   AddPageView(page, &intl->asView);
   LinkViewBelow(page, &con->asView, &intl->asView);
 
   OffsetRect(&modBounds, 0, lineHeight);
   NumStatView *intMod = Alloc(sizeof(NumStatView));
-  InitNumStatView(intMod, &modBounds, "", "ModINT", 0);
-  intMod->control.showSign = true;
+  InitNumStatView(intMod, &modBounds, "", "INT", 0);
   AddPageView(page, &intMod->asView);
   LinkViewBelow(page, &conMod->asView, &intMod->asView);
   LinkViewBeside(page, &intl->asView, &intMod->asView);
 
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *wis = Alloc(sizeof(NumStatView));
-  InitNumStatView(wis, &bounds, "WIS", "WIS", 0);
+  InitNumStatView(wis, &bounds, "WIS", "ModWIS", 0);
+  wis->control.showSign = true;
   AddPageView(page, &wis->asView);
   LinkViewBelow(page, &intl->asView, &wis->asView);
 
   OffsetRect(&modBounds, 0, lineHeight);
   NumStatView *wisMod = Alloc(sizeof(NumStatView));
-  InitNumStatView(wisMod, &modBounds, "", "ModWIS", 0);
-  wisMod->control.showSign = true;
+  InitNumStatView(wisMod, &modBounds, "", "WIS", 0);
   AddPageView(page, &wisMod->asView);
   LinkViewBelow(page, &intMod->asView, &wisMod->asView);
   LinkViewBeside(page, &wis->asView, &wisMod->asView);
 
   OffsetRect(&bounds, 0, lineHeight);
   NumStatView *cha = Alloc(sizeof(NumStatView));
-  InitNumStatView(cha, &bounds, "CHA", "CHA", 0);
+  InitNumStatView(cha, &bounds, "CHA", "ModCHA", 0);
+  cha->control.showSign = true;
   AddPageView(page, &cha->asView);
   LinkViewBelow(page, &wis->asView, &cha->asView);
 
   OffsetRect(&modBounds, 0, lineHeight);
   NumStatView *chaMod = Alloc(sizeof(NumStatView));
-  InitNumStatView(chaMod, &modBounds, "", "ModCHA", 0);
-  chaMod->control.showSign = true;
+  InitNumStatView(chaMod, &modBounds, "", "CHA", 0);
   AddPageView(page, &chaMod->asView);
   LinkViewBelow(page, &wisMod->asView, &chaMod->asView);
   LinkViewBeside(page, &cha->asView, &chaMod->asView);

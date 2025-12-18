@@ -19,6 +19,7 @@ static bool InputSpellDetail(View *view, u16 input)
 {
   SpellDetailView *spellView = (SpellDetailView*)view;
   if (KeyPressed(BTN_B)) {
+    HideArrows();
     return true;
   } else {
     InputView(&spellView->content.asView, input);

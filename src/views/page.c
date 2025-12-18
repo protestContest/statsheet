@@ -39,13 +39,13 @@ bool PageInput(View *view, u16 input)
   PageElement *selected = VecAt(page->elements, page->selected);
   if (!selected) return false;
 
-  if (KeyPressed(BTN_LEFT) && selected->left) {
+  if ((KeyPressed(BTN_LEFT) || AutoKey(BTN_LEFT)) && selected->left) {
     SelectView(page, selected->left);
-  } else if (KeyPressed(BTN_RIGHT) && selected->right) {
+  } else if ((KeyPressed(BTN_RIGHT) || AutoKey(BTN_RIGHT)) && selected->right) {
     SelectView(page, selected->right);
-  } else if (KeyPressed(BTN_UP) && selected->top) {
+  } else if ((KeyPressed(BTN_UP) || AutoKey(BTN_UP)) && selected->top) {
     SelectView(page, selected->top);
-  } else if (KeyPressed(BTN_DOWN) && selected->bottom) {
+  } else if ((KeyPressed(BTN_DOWN) || AutoKey(BTN_DOWN)) && selected->bottom) {
     SelectView(page, selected->bottom);
   } else {
     InputView(selected->view, input);
