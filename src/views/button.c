@@ -75,13 +75,22 @@ static void DrawButton(View *el)
   GetFontInfo(&info);
   MoveTo((el->bounds.right+el->bounds.left)/2 - TextWidth(button->title)/2,
          (el->bounds.bottom+el->bounds.top)/2 - (info.ascent+info.descent)/2 + info.ascent);
-  SetColor(WHITE);
+  if (button->active) {
+    Move(0,-1);
+  }
+  if (button->disabled) {
+    SetColor(GRAY);
+  } else {
+    SetColor(WHITE);
+  }
   Print(button->title);
 }
 
 static bool ButtonInput(View *el, u16 input)
 {
   Button *button = (Button*)el;
+  if (button->disabled) return false;
+
   button->active = (input & BTN_A) ? true : false;
 
   if (KeyPressed(BTN_A) || KeyReleased(BTN_A)) {
@@ -97,4 +106,5 @@ void InitButton(Button *button, Rect *bounds, char *title)
   InitView(&button->asView, bounds, DrawButton, ButtonInput, 0, 0);
   button->title = title;
   button->active = false;
+  button->disabled = false;
 }

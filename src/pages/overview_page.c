@@ -6,6 +6,7 @@
 #include "kit/mem.h"
 #include "views/page.h"
 #include "views/label.h"
+#include "views/toggle_view.h"
 
 void InitOverviewPage(Page *page)
 {
@@ -157,6 +158,12 @@ void InitOverviewPage(Page *page)
   AddPageView(page, &l3->asView);
   LinkViewBelow(page, &l2->asView, &l3->asView);
   LinkViewBeside(page, &spellSave->asView, &l3->asView);
+
+  OffsetRect(&bounds, 0, lineHeight + 8);
+  ToggleView *inspa = Alloc(sizeof(ToggleView));
+  InitToggleView(inspa, &bounds, "Inspiration", "Inspiration");
+  AddPageView(page, &inspa->asView);
+  LinkViewBelow(page, &l3->asView, &inspa->asView);
 
   LinkViewRight(page, &strMod->asView, &l3->asView);
   LinkViewRight(page, &dexMod->asView, &l3->asView);

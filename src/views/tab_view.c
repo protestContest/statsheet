@@ -2,6 +2,7 @@
 #include "kit/canvas.h"
 #include "kit/input.h"
 #include "kit/vec.h"
+#include "views/page_list.h"
 
 static void DrawTabView(View *view)
 {
@@ -58,8 +59,7 @@ void SelectTab(TabView *tabView, i32 tabNum)
 {
   if (tabNum < 0 || tabNum >= (i32)VecCount(tabView->tabs)) return;
   tabView->selectedTab = tabNum;
-  EraseRect(&tabView->asView.bounds);
-  DrawTabView(&tabView->asView);
+  RedrawPage();
 }
 
 View *GetTabView(TabView *tabView, u32 viewNum)

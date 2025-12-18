@@ -22,8 +22,17 @@ void PageDraw(View *view)
   FontInfo info;
   GetFontInfo(&info);
   u32 width = TextWidth(page->title);
-  Rect rect = {0, 0, SCREEN_W, info.ascent + info.descent};
+  Rect rect = {0, 0, SCREEN_W, LineHeight()};
   FillRect(&rect, DK_GRAY);
+
+  SetColor(RGB(48,48,48));
+  MoveTo(0, info.ascent+info.descent);
+  LineTo(SCREEN_W-1, info.ascent+info.descent);
+  SetColor(RGB(40,56,40));
+  MoveTo(0, info.ascent+info.descent+1);
+  LineTo(SCREEN_W-1, info.ascent+info.descent+1);
+
+
   SetColor(WHITE);
   MoveTo(SCREEN_W/2 - width/2, info.ascent);
   Print(page->title);

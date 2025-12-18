@@ -76,9 +76,10 @@ format of the packed resource file is described in `inc/kit/res.h`.
 
 ## Stat DSL
 
-The `res/Stats` resource is interesting. It allows defining stats by name and calculation with a
-simple stack-based expression language. The `PackStats` resource tool parses the file, including
-parsing the expressions into bytecode, and packs them into a specific resource format.
+The `res/Stats` resource is interesting. (Some would say "overengineered"; I would say
+"interesting".) It allows defining stats by name and calculation with a simple stack-based
+expression language. The `PackStats` resource tool parses the file, including parsing the
+expressions into bytecode, and packs them into a specific resource format.
 
 ```
 Level = 6

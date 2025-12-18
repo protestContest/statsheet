@@ -1,6 +1,4 @@
 #include "dice_check.h"
-#include "kit/input.h"
-#include "kit/interrupt.h"
 #include "views/dice_check_view.h"
 
 void DiceCheck(char *title, u32 die, i32 mod)

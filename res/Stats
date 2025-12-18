@@ -67,8 +67,7 @@ L1SlotsUsed = 4
 L2SlotsUsed = 0
 L3SlotsUsed = 0
 
-InspirationUsed = 0
-InspirationMax = 1
+Inspiration = 0
 
 ArmorMod = 0
 
