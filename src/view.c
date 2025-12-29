@@ -35,3 +35,9 @@ void Run(View *view)
     ActivateView(runStack[VecCount(runStack)-1], true);
   }
 }
+
+void SelectView(View *view)
+{
+  PlaceCursor(view->bounds.left, (view->bounds.top+view->bounds.bottom)/2);
+  ShowCursor();
+}

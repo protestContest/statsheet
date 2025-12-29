@@ -29,4 +29,4 @@ void LinkViewLeft(Page *page, View *view, View *left);
 void LinkViewRight(Page *page, View *view, View *right);
 void LinkViewBelow(Page *page, View *above, View *below);
 void LinkViewBeside(Page *page, View *left, View *right);
-void SelectView(Page *page, View *view);
+void SelectPageView(Page *page, View *view);

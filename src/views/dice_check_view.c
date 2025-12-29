@@ -6,6 +6,7 @@
 #include "kit/text.h"
 #include "kit/str.h"
 #include "ui.h"
+#include "views/button.h"
 #include "views/page_list.h"
 
 static void DrawResult(DiceCheckView *dcView)
@@ -121,6 +122,6 @@ void InitDiceCheckView(DiceCheckView *view, Rect *bounds, char *title, u32 die, 
   Rect modBounds = {cx-75-numWidth/2, cy-lineHeight/2, cx-75+numWidth/2, cy+lineHeight/2};
   InitNumControl(&view->modCtl, &modBounds, mod, dirV, true);
 
-  Rect btnBounds = {cx+20, cy + LineHeight(), cx+60, cy + LineHeight() + 16};
+  Rect btnBounds = {cx+20, cy + LineHeight(), cx+20+BTN_WIDTH, cy + LineHeight() + BTN_HEIGHT};
   InitButton(&view->btn, &btnBounds, "Roll");
 }

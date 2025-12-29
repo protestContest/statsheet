@@ -25,13 +25,13 @@ void PageDraw(View *view)
   Rect rect = {0, 0, SCREEN_W, LineHeight()};
   FillRect(&rect, DK_GRAY);
 
-  SetColor(RGB(48,48,48));
+  PenSize(1, 2);
+  // SetColor(RGB(40,56,40));
+  SetColor(RGB(56, 64, 56));
+
   MoveTo(0, info.ascent+info.descent);
   LineTo(SCREEN_W-1, info.ascent+info.descent);
-  SetColor(RGB(40,56,40));
-  MoveTo(0, info.ascent+info.descent+1);
-  LineTo(SCREEN_W-1, info.ascent+info.descent+1);
-
+  PenSize(1, 1);
 
   SetColor(WHITE);
   MoveTo(SCREEN_W/2 - width/2, info.ascent);
@@ -49,13 +49,13 @@ bool PageInput(View *view, u16 input)
   if (!selected) return false;
 
   if ((KeyPressed(BTN_LEFT) || AutoKey(BTN_LEFT)) && selected->left) {
-    SelectView(page, selected->left);
+    SelectPageView(page, selected->left);
   } else if ((KeyPressed(BTN_RIGHT) || AutoKey(BTN_RIGHT)) && selected->right) {
-    SelectView(page, selected->right);
+    SelectPageView(page, selected->right);
   } else if ((KeyPressed(BTN_UP) || AutoKey(BTN_UP)) && selected->top) {
-    SelectView(page, selected->top);
+    SelectPageView(page, selected->top);
   } else if ((KeyPressed(BTN_DOWN) || AutoKey(BTN_DOWN)) && selected->bottom) {
-    SelectView(page, selected->bottom);
+    SelectPageView(page, selected->bottom);
   } else {
     InputView(selected->view, input);
   }
@@ -67,7 +67,7 @@ void PageActivate(View *view, bool active)
   Page *page = (Page*)view;
   PageElement *selected = VecAt(page->elements, page->selected);
   if (active && selected) {
-    SelectView(page, selected->view);
+    SelectPageView(page, selected->view);
   } else {
     HideCursor();
   }
@@ -128,7 +128,7 @@ void LinkViewBeside(Page *page, View *left, View *right)
 }
 
 
-void SelectView(Page *page, View *view)
+void SelectPageView(Page *page, View *view)
 {
   if (!view) return;
   for (u32 i = 0; i < VecCount(page->elements); i++) {

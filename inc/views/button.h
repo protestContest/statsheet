@@ -1,6 +1,9 @@
 #pragma once
 #include "view.h"
 
+#define BTN_WIDTH   40
+#define BTN_HEIGHT  16
+
 typedef struct {
   View asView;
   char *title;

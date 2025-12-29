@@ -21,3 +21,4 @@ typedef struct View {
 
 void InitView(View *view, Rect *bounds, ViewDraw draw, ViewInput onInput, ViewActivate activate, ViewDestroy destroy);
 void Run(View *view);
+void SelectView(View *view);

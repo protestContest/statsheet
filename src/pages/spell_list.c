@@ -27,10 +27,10 @@ static bool PageViewInput(View *view, u16 input)
   PageInput(view, input);
   if (KeyPressed(BTN_LEFT)) {
     SelectTab(tabView, tabView->selectedTab-1);
-    SelectView(page, GetTabView(tabView, 0));
+    SelectPageView(page, GetTabView(tabView, 0));
   } else if (KeyPressed(BTN_RIGHT)) {
     SelectTab(tabView, tabView->selectedTab+1);
-    SelectView(page, GetTabView(tabView, 0));
+    SelectPageView(page, GetTabView(tabView, 0));
   } else if (KeyPressed(BTN_A)) {
     SpellRowView *row = (SpellRowView*)page->elements[page->selected].view;
     ShowSpell(row->spell);
@@ -64,7 +64,7 @@ void InitSpellListPage(Page *page)
     if (lastView) {
       LinkViewBelow(page, lastView, &row->asView);
     } else {
-      SelectView(page, &row->asView);
+      SelectPageView(page, &row->asView);
     }
     lastView = &row->asView;
     OffsetRect(&bounds, 0, lineHeight);

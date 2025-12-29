@@ -174,5 +174,5 @@ void InitSkillsPage(Page *page)
   LinkViewBelow(page, &wis->asView, &cha->asView);
   LinkViewBeside(page, &intl->asView, &cha->asView);
 
-  SelectView(page, &acrobatics->asView);
+  SelectPageView(page, &acrobatics->asView);
 }

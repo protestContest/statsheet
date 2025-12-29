@@ -47,7 +47,7 @@ OBJS := \
 
 DEPS := $(OBJS:.o=.d)
 
-.PHONY: all clean dump run $(RMAKE)
+.PHONY: all clean dump run
 
 all: $(ROM)
 
