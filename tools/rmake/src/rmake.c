@@ -76,6 +76,7 @@ void EncodeItem(ResInfo *info)
     *((u32*)info->data) = info->size << 8;
     fread(info->data + sizeof(u32), info->size, 1, f);
     fclose(f);
+    info->size += sizeof(u32);
   }
 }
 

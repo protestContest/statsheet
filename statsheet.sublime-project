@@ -37,7 +37,11 @@
 	"folders":
 	[
 		{
-			"path": "."
+			"path": ".",
+			"binary_file_patterns": [
+				"build/",
+				"dist/"
+			]
 		}
 	],
 	"settings":
