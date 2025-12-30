@@ -12,7 +12,8 @@ void *GetResource(char *name)
   u32 id = Hash(name, StrLen(name));
   for (u32 i = 0; i < resFile->count; i++) {
     if (resFile->resMap[i].id == id) {
-      return ((u8*)resFile) + resFile->resMap[i].offset;
+      u8 *data = ((u8*)resFile) + resFile->resMap[i].offset;
+      return Uncompress(data, 0);
     }
   }
   Assert(false);
@@ -22,30 +23,40 @@ void *GetResource(char *name)
 void *Uncompress(void *src, void *dst)
 {
   if (!src) return 0;
+
   u32 header = *((u32*)src);
   u8 type = (header & 0xFF) >> 4;
   u32 size = header >> 8;
+  u8 *data = ((u8*)src) + sizeof(u32);
+
+  if (type == Uncompressed && !dst) return data;
 
   if (!dst) dst = Alloc(size);
 
-  if (type == Uncompressed) {
-    Copy(ResData(src), dst, size);
-  } else if (type == Huffman) {
+  switch (type) {
+  case Uncompressed:
+    Copy(data, dst, size);
+    break;
+  case Huffman:
     HuffUnComp((HuffData*)src, dst);
-  } else if (type == LZSS) {
+    break;
+  case LZSS:
     LZSSUnComp((LZSSData*)src, dst);
-  } else if (type == RunLength) {
+    break;
+  case RunLength:
     RLUnComp((RLData*)src, dst);
-  } else if (type == SubFilter) {
+    break;
+  case SubFilter:
     if ((header & 0x0F) == 1) {
       Diff8bitUnFilter(src, dst);
     } else if ((header & 0x0F) == 2) {
       Diff16bitUnFilter(src, dst);
     } else {
-      Error("Invalid header");
+      return 0;
     }
-  } else {
-    Error("Invalid header");
+    break;
+  default:
+    return 0;
   }
 
   return dst;

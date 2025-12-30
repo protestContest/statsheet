@@ -15,7 +15,7 @@ format of the resource file:
   |  | res2 ID       |  |
 +-|--| res2 offset   |  /
 | |  +===============+
-  +->| res1 header   |
+| +->| res1 header   |
 |    | res1 data     |
 |    /               /
 |    +---------------+
@@ -44,11 +44,11 @@ Bit 0-3: Compression argument
   For huffman, data bit size (usually 4 or 8)
   For sub-filter, data size in bytes (1 or 2)
 Bit 4-7: Compression type:
+  Uncompressed: 0
   LZSS: 1
   Huffman: 2
   Run length: 3
   Sub-filter: 8
-
 */
 
 enum {
@@ -72,8 +72,6 @@ typedef struct {
 } ResFile;
 
 void *GetResource(char *name);
-#define ResLength(res)  (*((u32*)(res)) >> 8)
-#define ResData(res)    ((void*)(((u8*)(res))+sizeof(u32)))
 void *Uncompress(void *src, void *dst);
 
 

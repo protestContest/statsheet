@@ -3,5 +3,5 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void LZSSEncode(u8 *data, ResInfo *info);
+u32 CompressLZSS(void *src, u32 length, u8 **dst);
 void PackLZSS(ResInfo *info);

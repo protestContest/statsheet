@@ -231,7 +231,7 @@ static SavedStat *GetSavedStat(u32 id, u32 numStats)
 
 void InitStats(void)
 {
-  u8 *statData = ResData(GetResource("Stats"));
+  u8 *statData = GetResource("Stats");
   u32 numStats = *((u32*)statData);
   statData += sizeof(u32);
 

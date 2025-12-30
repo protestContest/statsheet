@@ -7,7 +7,7 @@
 
 void InitSprites(char *tileSheet)
 {
-  TGA *tiles = ResData(GetResource(tileSheet));
+  TGA *tiles = GetResource(tileSheet);
   Assert(tiles);
   u8 *colors = (u8*)tiles->data;
   SetTiles(tiles);

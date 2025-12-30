@@ -195,7 +195,7 @@ static i16 DoString(char *str, FontRec *rec, bool draw)
 
 void SetFont(char *name)
 {
-  currentFont = ResData(GetResource(name));
+  currentFont = GetResource(name);
   if (!currentFont) Error("Resource not found");
 }
 

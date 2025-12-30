@@ -28,7 +28,7 @@ static AnimatedSprite diceSprite;
 
 static void LoadDice(u32 index)
 {
-  TGA *tiles = ResData(GetResource(diceImgs[index]));
+  TGA *tiles = GetResource(diceImgs[index]);
 
   SetPalette(1, (u8*)tiles->data, tiles->paletteSize, tiles->paletteDepth);
   SetObjPalette(diceObj, 1);

@@ -18,4 +18,8 @@ typedef struct {
   ResInfo *items;
 } Manifest;
 
+#define ResHeader(size, type, arg)  (((size) << 8) | ((type) << 4) | (arg))
+#define WriteHeader(buf, header)    ((*((u32*)(buf)) = (header)),(void)0)
+#define ResLength(data)             (*((u32*)(data)) >> 8)
+
 Manifest *ParseManifest(char *path);
